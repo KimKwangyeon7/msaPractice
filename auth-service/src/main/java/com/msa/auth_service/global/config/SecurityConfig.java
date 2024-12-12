@@ -69,7 +69,9 @@ public class SecurityConfig {
                         .requestMatchers("/main").permitAll()
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
-                        .requestMatchers("/auth").permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/main").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
 //                .csrf(csrf -> csrf
@@ -113,13 +115,14 @@ public class SecurityConfig {
     public JwtTokenSecurityFilter jwtSecurityFilter() {
         RequestMatcher excludedMatcher = new OrRequestMatcher(
                 new AntPathRequestMatcher("/WEB-INF/**"), // JSP 파일 경로 제외
-                new AntPathRequestMatcher("/api/v1/member/login", "POST"),
-                new AntPathRequestMatcher("/api/v1/member/signup", "POST"),
-                new AntPathRequestMatcher("/login", "POST"), // JSP 로그인 요청 제외
-                new AntPathRequestMatcher("/login", "GET"),  // JSP 로그인 페이지 접근 제외
-                new AntPathRequestMatcher("/main", "GET"),
+                //new AntPathRequestMatcher("/api/v1/member/login", "POST"),
+                //new AntPathRequestMatcher("/api/v1/member/signup", "POST"),
+                new AntPathRequestMatcher("/auth/login", "POST"), // JSP 로그인 요청 제외
                 new AntPathRequestMatcher("/favicon.ico"),
-                new AntPathRequestMatcher("/auth", "GET")
+                //new AntPathRequestMatcher("auth/WEB-INF/**"),
+                new AntPathRequestMatcher("/auth/login", "GET"),
+                new AntPathRequestMatcher("/auth/main", "GET"),
+                new AntPathRequestMatcher("/error", "GET")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {
             @Override
