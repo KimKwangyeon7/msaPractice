@@ -17,7 +17,7 @@
             });
 
             // 로그아웃 버튼 클릭 시 요청
-            $('#secureAction').click(function () {
+            $('#logout').click(function () {
                 $.ajax({
                     url: '/auth/logout',
                     method: 'POST',
@@ -40,6 +40,6 @@
 <p>This page allows secure actions with CSRF and JWT protection.</p>
 
 <!-- Secure action button -->
-<button id="secureAction">Logout</button>
+<button id="logout">Logout</button>
 </body>
 </html>

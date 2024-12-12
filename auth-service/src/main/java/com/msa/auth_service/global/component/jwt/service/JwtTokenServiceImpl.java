@@ -24,14 +24,18 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     @Override
     public MemberLoginResponse issueAndSaveJwtToken(Member member) {
+        System.out.println("jwt 서비스임플 안!");
         String accessToken = jwtTokenProvider.issueAccessToken(member);
         String refreshToken = jwtTokenProvider.issueRefreshToken();
 
         log.info("== {} 회원에 대한 토큰 발급: {}", member.getEmail(), accessToken);
-
+        System.out.println(member.getEmail() + " 회원에 대한 토큰 발급 " + accessToken);
         try {
+
             refreshTokenRepository.save(member.getEmail(), refreshToken);
+            System.out.println("레디스 저장 성공!");
         } catch (Exception e) {
+            System.out.println("레디스 저장 실패!");
             throw new GlobalException(GlobalErrorCode.REDIS_CONNECTION_FAILURE);
         }
 

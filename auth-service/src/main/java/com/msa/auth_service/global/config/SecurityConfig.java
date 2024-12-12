@@ -63,24 +63,14 @@ public class SecurityConfig {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // 모든 요청에 대해 접근을 허용합니다.
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/member/signup").permitAll() // 인증 없이 허용
-                        .requestMatchers("/api/v1/member/login").permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/main").permitAll()
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/main").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
-//                .csrf(csrf -> csrf
-//                        .csrfTokenRepository(new CustomCsrfTokenRepository(redisTemplate, tokenPropsInfo))
-//                        .ignoringRequestMatchers(
-//                                new AntPathRequestMatcher("/api/v1/member/signup"), // 회원가입 경로
-//                                new AntPathRequestMatcher("/api/v1/member/login")       // 인증 관련 경로
-//                        )
-//                )
                 .csrf(AbstractHttpConfigurer::disable)
                 // Spring Security가 제공하는 기본 로그인 페이지와 로그아웃 메커니즘을 비활성화합니다.
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -100,10 +90,6 @@ public class SecurityConfig {
      *
      * @return WebSecurityCustomizer 객체
      */
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.ignoring().anyRequest();    // 모든 요청에 대해 보안 검사를 무시합니다.
-//    }
 
     /**
      * JWT 인증 필터를 생성하는 메소드입니다.
@@ -114,14 +100,13 @@ public class SecurityConfig {
     @Bean
     public JwtTokenSecurityFilter jwtSecurityFilter() {
         RequestMatcher excludedMatcher = new OrRequestMatcher(
-                new AntPathRequestMatcher("/WEB-INF/**"), // JSP 파일 경로 제외
-                //new AntPathRequestMatcher("/api/v1/member/login", "POST"),
-                //new AntPathRequestMatcher("/api/v1/member/signup", "POST"),
-                new AntPathRequestMatcher("/auth/login", "POST"), // JSP 로그인 요청 제외
+                new AntPathRequestMatcher("/WEB-INF/**"), // JSP 파일 경로 제공
                 new AntPathRequestMatcher("/favicon.ico"),
-                //new AntPathRequestMatcher("auth/WEB-INF/**"),
                 new AntPathRequestMatcher("/auth/login", "GET"),
+                new AntPathRequestMatcher("/auth/login", "POST"), // JSP 로그인 요청 제외
                 new AntPathRequestMatcher("/auth/main", "GET"),
+                new AntPathRequestMatcher("/auth/signup", "GET"),
+                new AntPathRequestMatcher("/auth/signup", "POST"),
                 new AntPathRequestMatcher("/error", "GET")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {
