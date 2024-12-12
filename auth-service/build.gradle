@@ -57,6 +57,11 @@ dependencies {
 	// Eureka client
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+	// JSP 설정
+	implementation 'javax.servlet:jstl:1.2'
+	runtimeOnly "org.apache.tomcat.embed:tomcat-embed-jasper"
+	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+
 
 }
 

@@ -10,7 +10,14 @@ server:
 spring:
   application:
     name: auth-service
-
+  cloud:
+    gateway:
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
+  devtools:
+    restart:
+      enabled: false
   eureka:
     client:
       service-url:
@@ -42,3 +49,11 @@ spring:
     redis:
       host: ${server.base-url}
       port: 6379
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+logging:
+  level:
+    org.springframework.security: DEBUG
