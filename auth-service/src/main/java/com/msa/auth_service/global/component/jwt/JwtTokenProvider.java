@@ -43,6 +43,7 @@ public class JwtTokenProvider {
      * @return 발급된 액세스 토큰 문자열
      */
     public String issueAccessToken(Member member) {
+        System.out.println("jwt 프로바이더 accesstoken 안!");
         // 사용자 정보를 기반으로 Claims 생성
         Claims claims = Jwts.claims()
                 .id(String.valueOf(member.getId()))
@@ -63,6 +64,7 @@ public class JwtTokenProvider {
      * @return 발급된 리프레시 토큰 문자열
      */
     public String issueRefreshToken() {
+        System.out.println("jwt 프로바이더 refreshtoken 안!");
         // Claims 없이 리프레시 토큰만 발급
         return issueToken(null, tokenPropsInfo.refreshExpiration(), tokenPropsInfo.refreshKey());
     }
