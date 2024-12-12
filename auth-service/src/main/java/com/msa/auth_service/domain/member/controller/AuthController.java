@@ -27,29 +27,36 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class AuthController {
 
     private final MemberService memberService;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @GetMapping("/auth/signup")
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validateToken() {
+        return ResponseEntity.ok("Token validated successfully");
+    }
+
+    @GetMapping("/signup")
     public String signUpPage() {
         return "signup";
     }
 
-    @PostMapping("/auth/signup")
+    @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody MemberSignupRequest signupRequest) {
         memberService.signupMember(signupRequest);
         return ResponseEntity.ok(Map.of("redirectUrl", "/auth/login", "message", Message.success()));
     }
 
-    @GetMapping("/auth/login")
+    @GetMapping("/login")
     public String loginPage() {
         return "login"; // JSP 파일 경로: /WEB-INF/views/login.jsp
     }
 
 
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         HttpServletResponse response,
@@ -71,7 +78,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/auth/main")
+    @GetMapping("/main")
     public String mainPage(@ModelAttribute("csrfToken") String csrfToken, @ModelAttribute("message") Message<MemberLoginResponse> message, Model model) {
         model.addAttribute("csrfToken", csrfToken);
         model.addAttribute("message", message);

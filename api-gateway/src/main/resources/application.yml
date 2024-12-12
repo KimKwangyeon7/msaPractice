@@ -19,14 +19,20 @@ spring:
           uri: https://localhost:9443/
           predicates:
             - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<remaining>.*), /$\\{remaining}
         - id: member-service
           uri: lb://member-service
           predicates:
             - Path=/member/**
+          filters:
+            - name: AuthValidationFilter
         - id: community-service
           uri: lb://community-service
           predicates:
             - Path=/community/**
+          filters:
+            - name: AuthValidationFilter
     discovery:
       locator:
         enabled: true
