@@ -1,0 +1,20 @@
+# Java/Gradle 관련
+*.class
+*.jar
+*.war
+*.ear
+/build/
+/target/
+.gradle/
+*.iml
+
+# Logs
+*.log
+/logs/
+
+# IDE 관련
+.idea/
+*.swp
+
+# 환경 설정
+.env

@@ -1,0 +1,6 @@
+#spring.application.name=community-service
+server:
+  port: 9002
+spring:
+  application:
+    name: community-service

@@ -1,0 +1,44 @@
+#spring.application.name=auth-service
+server:
+  base-url: localhost
+  port: 9443
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: 8llow8llowme
+    key-store-type: PKCS12
+spring:
+  application:
+    name: auth-service
+
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/ # Eureka ?? ??
+      instance:
+        hostname: localhost
+        prefer-ip-address: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver  # DB ????
+    url: jdbc:mysql://${server.base-url}:3306/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # ?????? URL
+    username: root                    # ?????? ???
+    password: 8llow8llowme                   # ?????? ?? ????
+
+  # data_????.sql ?? ?? setting (?????)
+  #  sql:
+  #    init:
+  #      mode: always
+  #      data-locations:
+  #        - 'classpath:/db/dummy/FOREIGN_KEY_CHECKS_0.sql'
+  #        - 'classpath:/db/dummy/db_dump.sql'
+  #        - 'classpath:/db/dummy/db_dump1.sql'
+  #        - 'classpath:/db/dummy/db_dump2.sql'
+  #        - 'classpath:/db/dummy/FOREIGN_KEY_CHECKS_1.sql'
+
+  # NoSQL setting
+  data:
+    # Redis setting
+    redis:
+      host: ${server.base-url}
+      port: 6379
