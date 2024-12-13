@@ -51,6 +51,7 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+
     @Bean
     RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
                                             MessageListenerAdapter listenerAdapter) {

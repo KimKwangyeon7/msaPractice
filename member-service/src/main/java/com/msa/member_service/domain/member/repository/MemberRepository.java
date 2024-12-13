@@ -1,6 +1,6 @@
 package com.msa.member_service.domain.member.repository;
 
-import com.study.springStudy.domain.member.entity.Member;
+import com.msa.member_service.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
 package com.msa.member_service.domain.member.dto;
 
 
-import com.study.springStudy.domain.member.entity.enums.MemberRole;
-import com.study.springStudy.global.component.oauth.vendor.enums.OAuthDomain;
+import com.msa.member_service.domain.member.entity.enums.MemberRole;
+import com.msa.member_service.global.component.oauth.vendor.enums.OAuthDomain;
 
 public record MemberInfo(
         Long id,

@@ -2,6 +2,11 @@
 server:
   base-url: localhost
   port: 9443
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   ssl:
     enabled: true
     key-store: classpath:keystore.p12
@@ -44,6 +49,8 @@ spring:
     redis:
       host: ${server.base-url}
       port: 6379
+
+  # JSP Setting
   mvc:
     view:
       prefix: /WEB-INF/views/

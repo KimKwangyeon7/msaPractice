@@ -1,13 +1,10 @@
 package com.msa.member_service.domain.member.service;
 
-import com.study.springStudy.domain.member.dto.*;
-import com.study.springStudy.domain.member.entity.Member;
-import com.study.springStudy.domain.member.exception.MemberErrorCode;
-import com.study.springStudy.domain.member.exception.MemberException;
-import com.study.springStudy.domain.member.repository.MemberRepository;
-import com.study.springStudy.global.component.csrf.repository.CustomCsrfTokenRepository;
-import com.study.springStudy.global.component.jwt.repository.RefreshTokenRepository;
-import com.study.springStudy.global.component.jwt.service.JwtTokenService;
+import com.msa.member_service.domain.member.dto.MemberInfo;
+import com.msa.member_service.domain.member.entity.Member;
+import com.msa.member_service.domain.member.exception.MemberErrorCode;
+import com.msa.member_service.domain.member.exception.MemberException;
+import com.msa.member_service.domain.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
 
@@ -25,10 +23,6 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final JwtTokenService jwtTokenService;
-    private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final CustomCsrfTokenRepository customCsrfTokenRepository;
     private final WebClient authServiceWebClient;
 
 //    private final SimulationRepository simulationRepository;
@@ -36,131 +30,84 @@ public class MemberServiceImpl implements MemberService {
 //    private final CommercialAnalysisRepository commercialAnalysisRepository;
 
     @Override
-    public void signupMember(MemberSignupRequest signupRequest) {
-        if (memberRepository.existsByEmail(signupRequest.getEmail())) {
-            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL);
-        }
-
-        signupRequest.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-
-        memberRepository.save(signupRequest.toEntity());
+    public String logoutMember(String memberEmail) {
+        return authServiceWebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/auth/logout/{email}")
+                        .build(memberEmail)) // PathVariable로 이메일을 설정
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // 동기 처리, 필요에 따라 비동기로 변경 가능
     }
 
-    @Override
-    public MemberLoginResponse loginMember(MemberLoginRequest loginRequest, HttpServletResponse response) {
-        Member member = findMemberByEmail(loginRequest.email());
-
-        String realPassword = member.getPassword();
-
-        if (!passwordEncoder.matches(loginRequest.password(), realPassword)) {
-            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
-        }
-
-        MemberLoginResponse memberLoginResponse =  jwtTokenService.issueAndSaveJwtToken(member);
-
-
-        Cookie accessTokenCookie = new Cookie("accessToken", memberLoginResponse.tokenInfo().accessToken());
-        accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
-        accessTokenCookie.setMaxAge(6000); // 6000초
-
-        // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
-        accessTokenCookie.setHttpOnly(true);
-        // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
-        accessTokenCookie.setSecure(true);
-        // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
-        // SameSite 설정은 Java 11 이상에서 지원됩니다.
-        accessTokenCookie.setAttribute("SameSite", "Lax");
-        // 쿠키를 응답에 추가
-        response.addCookie(accessTokenCookie);
-
-        customCsrfTokenRepository.issueAndSaveCsrfToken(loginRequest.email(), response);
-        return memberLoginResponse;
-    }
-
-    @Override
-    public void logoutMember(String email) {
-        Optional<String> token = refreshTokenRepository.find(email);
-
-        if (token.isEmpty()) {
-            throw new MemberException(MemberErrorCode.ALREADY_MEMBER_LOGOUT);
-        }
-
-        // 리프레쉬 토큰 삭제
-        refreshTokenRepository.delete(email);
-        customCsrfTokenRepository.delete(email);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public MemberInfo getMember(Long memberId) {
-        Member member = findMemberById(memberId);
-
-        return new MemberInfo(
-                member.getId(),
-                member.getEmail(),
-                member.getName(),
-                member.getNickname(),
-                member.getProfileImage(),
-                member.getRole(),
-                member.getOAuthDomain()
-        );
-    }
-
-    @Override
-    public void deleteMember(Long memberId) {
-//        // MongoDB에 저장된 데이터 삭제
-//        simulationRepository.deleteByMemberId(memberId);
-//        recommendationRepository.deleteByUserId(memberId);
-//        commercialAnalysisRepository.deleteByMemberId(memberId);
-
-        // JPA에 저장된 데이터 삭제
-        Member member = findMemberById(memberId);
-        refreshTokenRepository.delete(member.getEmail());
-        customCsrfTokenRepository.delete(member.getEmail());
-        memberRepository.deleteById(memberId);
-    }
-
-    @Override
-    public void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest) {
-        Member member = findMemberById(memberId);
-
-        member.updateProfileImageAndNickname(updateRequest);
-    }
-
-    @Override
-    public void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest) {
-        Member member = findMemberById(memberId);
-
-        String realPassword = member.getPassword();
-
-        // 현재 비밀번호 제대로 입력했는지 확인
-        if (!passwordEncoder.matches(passwordChangeRequest.nowPassword(), realPassword)) {
-            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
-        }
-
-        // 현재 비밀번호와 변경하려는 비밀번호가 같은지 확인 (같은 경우 Exception 발생)
-        if (passwordEncoder.matches(passwordChangeRequest.changePassword(), realPassword)) {
-            throw new MemberException(MemberErrorCode.CURRENT_CHANGE_MATCH_PASSWORD);
-        }
-
-        // 비밀번호 변경과 비밀번호 변경 확인 서로 같은지 확인 (다른 경우 Exception 발생)
-        if (!passwordChangeRequest.changePassword().equals(passwordChangeRequest.changePasswordCheck())) {
-            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
-        }
-
-        member.updatePassword(passwordEncoder.encode(passwordChangeRequest.changePassword()));
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public MemberInfo getMember(Long memberId) {
+//        Member member = findMemberById(memberId);
+//
+//        return new MemberInfo(
+//                member.getId(),
+//                member.getEmail(),
+//                member.getName(),
+//                member.getNickname(),
+//                member.getProfileImage(),
+//                member.getRole(),
+//                member.getOAuthDomain()
+//        );
+//    }
+//
+//    @Override
+//    public void deleteMember(Long memberId) {
+////        // MongoDB에 저장된 데이터 삭제
+////        simulationRepository.deleteByMemberId(memberId);
+////        recommendationRepository.deleteByUserId(memberId);
+////        commercialAnalysisRepository.deleteByMemberId(memberId);
+//
+//        // JPA에 저장된 데이터 삭제
+//        Member member = findMemberById(memberId);
+//        refreshTokenRepository.delete(member.getEmail());
+//        customCsrfTokenRepository.delete(member.getEmail());
+//        memberRepository.deleteById(memberId);
+//    }
+//
+//    @Override
+//    public void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest) {
+//        Member member = findMemberById(memberId);
+//
+//        member.updateProfileImageAndNickname(updateRequest);
+//    }
+//
+//    @Override
+//    public void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest) {
+//        Member member = findMemberById(memberId);
+//
+//        String realPassword = member.getPassword();
+//
+//        // 현재 비밀번호 제대로 입력했는지 확인
+//        if (!passwordEncoder.matches(passwordChangeRequest.nowPassword(), realPassword)) {
+//            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
+//        }
+//
+//        // 현재 비밀번호와 변경하려는 비밀번호가 같은지 확인 (같은 경우 Exception 발생)
+//        if (passwordEncoder.matches(passwordChangeRequest.changePassword(), realPassword)) {
+//            throw new MemberException(MemberErrorCode.CURRENT_CHANGE_MATCH_PASSWORD);
+//        }
+//
+//        // 비밀번호 변경과 비밀번호 변경 확인 서로 같은지 확인 (다른 경우 Exception 발생)
+//        if (!passwordChangeRequest.changePassword().equals(passwordChangeRequest.changePasswordCheck())) {
+//            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
+//        }
+//
+//        member.updatePassword(passwordEncoder.encode(passwordChangeRequest.changePassword()));
+//    }
 
     // 인증서버로 통신
     @Override
     public String reissueAccessToken(String memberEmail) {
-
-        Member member = memberRepository.findByEmail(memberEmail)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-
         return authServiceWebClient.post()
-                .uri("/auth/reissue/accessToken")
-                .bodyValue(member) // RequestBody에 Member 객체를 포함
+                .uri(uriBuilder -> uriBuilder
+                        .path("/auth/reissue/{email}")
+                        .build(memberEmail)) // PathVariable로 이메일을 설정
                 .retrieve()
                 .bodyToMono(String.class)
                 .block(); // 동기 처리, 필요에 따라 비동기로 변경 가능

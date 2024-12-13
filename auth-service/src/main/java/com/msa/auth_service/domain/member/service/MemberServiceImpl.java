@@ -12,10 +12,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Slf4j
@@ -29,7 +31,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CustomCsrfTokenRepository customCsrfTokenRepository;
-
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public void signupMember(MemberSignupRequest signupRequest) {
@@ -44,25 +46,30 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberLoginResponse loginMember(MemberLoginRequest loginRequest, HttpServletResponse response) {
-        System.out.println("서비스 임플안");
+        //System.out.println("서비스 임플안");
         Member member = findMemberByEmail(loginRequest.email());
 
         String realPassword = member.getPassword();
 
         if (!passwordEncoder.matches(loginRequest.password(), realPassword)) {
-            System.out.println("Invalid password");
+            //System.out.println("Invalid password");
             throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
         }
-
+        // jwt 토큰
         MemberLoginResponse memberLoginResponse =  jwtTokenService.issueAndSaveJwtToken(member);
-
+        // 응답 헤더 쿠키에 추가
         Cookie accessTokenCookie = getAccessTokenCookie(memberLoginResponse);
-        // 쿠키를 응답에 추가
         response.addCookie(accessTokenCookie);
-
+        // csrf 토큰
         customCsrfTokenRepository.issueAndSaveCsrfToken(loginRequest.email(), response);
-        System.out.println("Successfully logged in");
+        // memberInfo 저장
+        storeUserInRedis(memberLoginResponse);
         return memberLoginResponse;
+    }
+
+    public void storeUserInRedis(MemberLoginResponse memberLoginResponse) {
+        String redisKey = "memberInfo::" + memberLoginResponse.memberInfo().email();
+        redisTemplate.opsForValue().set(redisKey, String.valueOf(memberLoginResponse.memberInfo()), Duration.ofHours(24));
     }
 
     private static Cookie getAccessTokenCookie(MemberLoginResponse memberLoginResponse) {
@@ -76,7 +83,7 @@ public class MemberServiceImpl implements MemberService {
         accessTokenCookie.setSecure(true);
         // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
         // SameSite 설정은 Java 11 이상에서 지원됩니다.
-        accessTokenCookie.setAttribute("SameSite", "Lax");
+        accessTokenCookie.setAttribute("SameSite", "None");
         return accessTokenCookie;
     }
 
