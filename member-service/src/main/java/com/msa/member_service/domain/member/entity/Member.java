@@ -1,10 +1,10 @@
 package com.msa.member_service.domain.member.entity;
 
 
-import com.study.springStudy.domain.member.dto.MemberUpdateRequest;
-import com.study.springStudy.domain.member.entity.enums.MemberRole;
-import com.study.springStudy.global.common.entity.BaseEntity;
-import com.study.springStudy.global.component.oauth.vendor.enums.OAuthDomain;
+import com.msa.member_service.domain.member.dto.MemberUpdateRequest;
+import com.msa.member_service.domain.member.entity.enums.MemberRole;
+import com.msa.member_service.global.common.entity.BaseEntity;
+import com.msa.member_service.global.component.oauth.vendor.enums.OAuthDomain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;

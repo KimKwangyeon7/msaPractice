@@ -1,6 +1,6 @@
 package com.msa.member_service.domain.member.exception;
 
-import com.study.springStudy.global.common.dto.Message;
+import com.msa.member_service.global.common.dto.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

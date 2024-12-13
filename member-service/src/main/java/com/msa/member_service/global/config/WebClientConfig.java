@@ -1,4 +1,8 @@
-package com.msa.member_service.config;
+package com.msa.member_service.global.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {

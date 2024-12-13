@@ -5,24 +5,40 @@ server:
     key-store: classpath:keystore.p12
     key-store-password: 8llow8llowme
     key-store-type: PKCS12
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: gateway-service
-  devtools:
-    restart:
-      enabled: false
   cloud:
     gateway:
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - 'https://localhost:9443'
+            allow-credentials: true
+            allowedHeaders: "*"
+            allowedMethods:
+              - PUT
+              - GET
+              - POST
+              - DELETE
+              - OPTIONS
       routes:
         - id: auth-service
-          uri: https://localhost:9443/
+          uri: https://localhost:9443
           predicates:
             - Path=/auth/**
-          filters:
-            - RewritePath=/auth/(?<remaining>.*), /$\\{remaining}
         - id: member-service
-          uri: lb://member-service
+          uri: http://localhost:9001
           predicates:
             - Path=/member/**
           filters:
@@ -33,9 +49,12 @@ spring:
             - Path=/community/**
           filters:
             - name: AuthValidationFilter
+
     discovery:
       locator:
         enabled: true
+  main:
+    web-application-type: reactive
 
 eureka:
   client:
@@ -43,7 +62,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
 logging:
   level:
     org.springframework.security: DEBUG
-

@@ -4,7 +4,6 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,7 +15,7 @@ public class AuthValidationFilter extends AbstractGatewayFilterFactory<AuthValid
 
     public AuthValidationFilter(WebClient.Builder webClientBuilder) {
         super(Config.class);
-        this.webClient = webClientBuilder.baseUrl("https://localhost:9443").build(); // 인증 서버 URL
+        this.webClient = webClientBuilder.baseUrl("https://localhost:8443").build(); // 인증 서버 URL
     }
 
     @Override
@@ -25,25 +24,24 @@ public class AuthValidationFilter extends AbstractGatewayFilterFactory<AuthValid
             String csrfToken = exchange.getRequest().getHeaders().getFirst("X-CSRF-Token");
             String accessToken = exchange.getRequest().getHeaders().getFirst(HttpHeaders.COOKIE);
 
-            // /auth로 시작하는 요청은 검증 없이 그대로 auth-server로 전달
+            // auth 경로는 인증 검증 생략
             if (exchange.getRequest().getPath().toString().startsWith("/auth")) {
                 return chain.filter(exchange);
             }
 
-            // 헤더가 없는 경우 401 Unauthorized 응답
             if (csrfToken == null || accessToken == null) {
+                System.out.println("csrfToken: " + csrfToken + "accessToken: " + accessToken);
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
 
-            // WebClient를 통해 인증 서버에서 검증
             return webClient.post()
                     .uri("/auth/validate")
                     .header("X-CSRF-Token", csrfToken)
                     .header(HttpHeaders.COOKIE, accessToken)
                     .retrieve()
                     .onStatus(
-                            HttpStatusCode::isError, // 에러 상태 확인
+                            status -> status.is4xxClientError() || status.is5xxServerError(),
                             response -> Mono.error(new RuntimeException("Invalid Token"))
                     )
                     .toBodilessEntity()
@@ -56,6 +54,6 @@ public class AuthValidationFilter extends AbstractGatewayFilterFactory<AuthValid
     }
 
     public static class Config {
-        // 필요 시 설정 추가 가능
+        // 설정 클래스 (필요시 확장 가능)
     }
 }

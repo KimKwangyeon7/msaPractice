@@ -1,10 +1,38 @@
 #spring.application.name=member-service
 server:
+  base-url: localhost
   port: 9001
 spring:
   application:
     name: member-service
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+  devtools:
+    restart:
+      enabled: false
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/ # Eureka ?? ??
+      instance:
+        hostname: localhost
+        prefer-ip-address: true
+
+  # NoSQL setting
+  data:
+    # Redis setting
+    redis:
+      host: ${server.base-url}
+      port: 6379
+
+  # JSP Setting
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+# log 관리
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate:
+      type.descriptor.sql: trace
+      org.hibernate.SQLQuery: debug
