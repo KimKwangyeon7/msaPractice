@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/logout/**").permitAll()
                         .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/main").permitAll()
                         .requestMatchers("/error").permitAll()
@@ -107,6 +108,7 @@ public class SecurityConfig {
                 new AntPathRequestMatcher("/auth/main", "GET"),
                 new AntPathRequestMatcher("/auth/signup", "GET"),
                 new AntPathRequestMatcher("/auth/signup", "POST"),
+                new AntPathRequestMatcher("/auth/logout/**", "POST"),
                 new AntPathRequestMatcher("/error", "GET")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {
@@ -169,7 +171,8 @@ public class SecurityConfig {
         // 사용자 인증을 필요로 하는 리소스에 대한 접근을 가능하게 합니다.
         config.setAllowCredentials(true);
         // 모든 출처에서 오는 요청을 허용합니다. 구체적인 출처를 지정하는 것이 권장됩니다.
-        config.addAllowedOrigin("https://localhost:8443");
+        config.addAllowedOrigin("http://localhost:8443");
+        config.addAllowedOrigin("http://localhost:9001");
         // 모든 요청 헤더를 허용합니다. 클라이언트가 요청에 다양한 종류의 헤더를 포함시킬 수 있습니다.
         config.addAllowedHeader("*");
         // 모든 HTTP 메서드를 허용합니다. 이를 통해 RESTful API 지원이 강화됩니다.

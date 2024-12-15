@@ -14,7 +14,7 @@
 
                 // AJAX 요청으로 게이트웨이(8443) 포트로 로그인 요청
                 $.ajax({
-                    url: "https://localhost:8443/auth/login",
+                    url: "http://localhost:8443/auth/login",
                     method: "POST",
                     contentType: "application/x-www-form-urlencoded",
                     data: { username: username, password: password },
@@ -24,7 +24,7 @@
                     success: function (response) {
                         alert("Login successful!");
                         // 메인 페이지로 이동
-                        window.location.href = "https://localhost:8443/auth/main";
+                        window.location.href = "http://localhost:8443/auth/main";
                     },
                     error: function (xhr) {
                         let errorMessage = 'Unknown error'; // 기본 에러 메시지

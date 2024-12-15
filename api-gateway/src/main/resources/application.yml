@@ -1,10 +1,12 @@
 server:
   port: 8443
+  http:
+    version: V_1_1 # HTTP/1.1 강제 설정
   ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: 8llow8llowme
-    key-store-type: PKCS12
+    enabled: false
+#    key-store: classpath:keystore.p12
+#    key-store-password: 8llow8llowme
+#    key-store-type: PKCS12
   servlet:
     encoding:
       charset: UTF-8
@@ -16,25 +18,30 @@ spring:
     name: gateway-service
   cloud:
     gateway:
-      httpclient:
-        ssl:
-          use-insecure-trust-manager: true
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - 'https://localhost:9443'
-            allow-credentials: true
-            allowedHeaders: "*"
-            allowedMethods:
-              - PUT
-              - GET
-              - POST
-              - DELETE
-              - OPTIONS
+#      httpclient:
+#        ssl:
+#          key-store: classpath:keystore.p12
+#          key-store-password: 8llow8llowme
+#          key-store-type: PKCS12
+#          trusted-x509-certificates:
+#            - classpath:authserver_cert.pem # 인증 서버의 인증서 경로
+#      globalcors:
+#        cors-configurations:
+#          '[/**]':
+#            allowedOrigins:
+#              - 'http://localhost:9443'
+#              - 'http://localhost:8443'
+#            allow-credentials: true
+#            allowedHeaders: "*"
+#            allowedMethods:
+#              - PUT
+#              - GET
+#              - POST
+#              - DELETE
+#              - OPTIONS
       routes:
         - id: auth-service
-          uri: https://localhost:9443
+          uri: http://localhost:9443
           predicates:
             - Path=/auth/**
         - id: member-service
@@ -65,4 +72,6 @@ eureka:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    root: INFO
+    org.springframework.boot: DEBUG
+    org.springframework.core.env: DEBUG

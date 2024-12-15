@@ -8,10 +8,10 @@ server:
       enabled: true
       force: true
   ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: 8llow8llowme
-    key-store-type: PKCS12
+    enabled: false
+#    key-store: classpath:keystore.p12
+#    key-store-password: 8llow8llowme
+#    key-store-type: PKCS12
 spring:
   application:
     name: auth-service

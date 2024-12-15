@@ -72,6 +72,11 @@ public class MemberServiceImpl implements MemberService {
         redisTemplate.opsForValue().set(redisKey, String.valueOf(memberLoginResponse.memberInfo()), Duration.ofHours(24));
     }
 
+    public void deleteUserInRedis(String email) {
+        String redisKey = "memberInfo::" + email;
+        redisTemplate.delete(redisKey);
+    }
+
     private static Cookie getAccessTokenCookie(MemberLoginResponse memberLoginResponse) {
         Cookie accessTokenCookie = new Cookie("accessToken", memberLoginResponse.tokenInfo().accessToken());
         accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
@@ -80,10 +85,10 @@ public class MemberServiceImpl implements MemberService {
         // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
         accessTokenCookie.setHttpOnly(true);
         // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
-        accessTokenCookie.setSecure(true);
+        //accessTokenCookie.setSecure(true);
         // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
         // SameSite 설정은 Java 11 이상에서 지원됩니다.
-        accessTokenCookie.setAttribute("SameSite", "None");
+        //accessTokenCookie.setAttribute("SameSite", "None");
         return accessTokenCookie;
     }
 
@@ -98,6 +103,7 @@ public class MemberServiceImpl implements MemberService {
         // 리프레쉬 토큰 삭제
         refreshTokenRepository.delete(email);
         customCsrfTokenRepository.delete(email);
+        deleteUserInRedis(email);
     }
 
     @Override

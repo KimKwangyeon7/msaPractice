@@ -15,7 +15,7 @@ public class AuthValidationFilter extends AbstractGatewayFilterFactory<AuthValid
 
     public AuthValidationFilter(WebClient.Builder webClientBuilder) {
         super(Config.class);
-        this.webClient = webClientBuilder.baseUrl("https://localhost:8443").build(); // 인증 서버 URL
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8443").build(); // 인증 서버 URL
     }
 
     @Override
