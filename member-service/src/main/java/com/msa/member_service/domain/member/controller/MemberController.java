@@ -4,13 +4,10 @@ package com.msa.member_service.domain.member.controller;
 import com.msa.member_service.domain.member.service.MemberService;
 import com.msa.member_service.global.common.dto.Message;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,9 +19,19 @@ public class MemberController {
 
     @PostMapping("/logout/{email}")
     //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<Message<String>> logoutMember(@PathVariable String email,
+    public ResponseEntity<Message<String>> logoutMember(@PathVariable String email, HttpServletRequest request,
                                                       HttpServletResponse response) {
-        String res = memberService.logoutMember(email);;
+        String csrfToken = request.getHeader("X-CSRF-TOKEN");
+        String accessToken = "";
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) { // JWT 쿠키 이름 확인
+                    accessToken =  cookie.getValue();
+                }
+            }
+        }
+        System.out.println("csrf 토큰: " + csrfToken + "jwt 토큰: " + accessToken);
+        String res = memberService.logoutMember(email);
         // 쿠키 삭제
         Cookie accessTokenCookie = new Cookie("accessToken", null);
         accessTokenCookie.setMaxAge(0);

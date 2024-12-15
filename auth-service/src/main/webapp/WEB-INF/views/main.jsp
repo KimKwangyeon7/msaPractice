@@ -4,7 +4,7 @@
 <head>
     <title>Main Page</title>
     <meta name="csrf-token" content="${csrfToken}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
             // CSRF 토큰 및 이메일 값 가져오기
@@ -17,7 +17,6 @@
                     alert('이메일 정보가 없습니다!');
                     return;
                 }
-
                 $.ajax({
                     url: `/member/logout/${email}`,
                     method: 'POST',

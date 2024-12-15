@@ -10,7 +10,7 @@ public class WebClientConfig {
     @Bean
     public WebClient authServiceWebClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("http://auth-service") // auth-service의 기본 URL
+                .baseUrl("http://localhost:9443") // auth-service의 기본 URL
                 .build();
     }
 }
