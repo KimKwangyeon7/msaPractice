@@ -69,6 +69,11 @@ public class SecurityConfig {
                         .requestMatchers("/auth/logout/**").permitAll()
                         .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/main").permitAll()
+                        .requestMatchers("/auth/delete/**").permitAll()
+                        .requestMatchers("/auth/password/**").permitAll()
+                        .requestMatchers("/auth/update/**").permitAll()
+                        .requestMatchers("/auth/get").permitAll()
+                        .requestMatchers("/auth/reissue/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
@@ -109,6 +114,13 @@ public class SecurityConfig {
                 new AntPathRequestMatcher("/auth/signup", "GET"),
                 new AntPathRequestMatcher("/auth/signup", "POST"),
                 new AntPathRequestMatcher("/auth/logout/**", "POST"),
+                new AntPathRequestMatcher("/auth/delete/**", "DELETE"),
+                new AntPathRequestMatcher("/auth/reissue/**", "DELETE"),
+                new AntPathRequestMatcher("/auth/update/**", "PATCH"),
+                new AntPathRequestMatcher("/auth/password/**", "PATCH"),
+                new AntPathRequestMatcher("/auth/update/**", "GET"),
+                new AntPathRequestMatcher("/auth/password/**", "GET"),
+                new AntPathRequestMatcher("/auth/get", "GET"),
                 new AntPathRequestMatcher("/error", "GET")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {

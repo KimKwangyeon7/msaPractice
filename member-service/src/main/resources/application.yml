@@ -36,3 +36,9 @@ logging:
     org.hibernate:
       type.descriptor.sql: trace
       org.hibernate.SQLQuery: debug
+
+jwt:
+  accessKey: "w7Dd0jmlEjFvWfnH8xCyAaD4J9KeShMQEfK5TZZjbgM="
+  refreshKey: "YrLk76XDh9TaBtKxN+WxMr1Zm+zKlOPUv6RJqz9TZYI="
+  accessExpiration: PT420M  # 420분 (PT420M)
+  refreshExpiration: PT10080M  # 10080분 (7일) (PT10080M)
