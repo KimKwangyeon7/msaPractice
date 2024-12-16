@@ -10,13 +10,13 @@ public interface MemberService {
 
     String logoutMember(String email);
 
-//    MemberInfo getMember(Long memberId);
-//
-//    void deleteMember(Long memberId);
-//
-//    void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest);
-//
-//    void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest);
+    MemberInfo getMember(String email);
+
+    void deleteMember(String email);
+
+    void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest);
+
+    void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest);
 
     String reissueAccessToken(String email);
 }

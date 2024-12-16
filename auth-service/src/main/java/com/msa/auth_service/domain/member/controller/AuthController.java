@@ -1,9 +1,7 @@
 package com.msa.auth_service.domain.member.controller;
 
 
-import com.msa.auth_service.domain.member.dto.MemberLoginRequest;
-import com.msa.auth_service.domain.member.dto.MemberLoginResponse;
-import com.msa.auth_service.domain.member.dto.MemberSignupRequest;
+import com.msa.auth_service.domain.member.dto.*;
 import com.msa.auth_service.domain.member.entity.Member;
 import com.msa.auth_service.domain.member.exception.MemberErrorCode;
 import com.msa.auth_service.domain.member.exception.MemberException;
@@ -93,7 +91,6 @@ public class AuthController {
         }
     }
 
-
     @GetMapping("/main")
     public String mainPage(HttpSession session, Model model) {
         // 세션에서 CSRF 토큰과 이메일 가져오기
@@ -112,6 +109,41 @@ public class AuthController {
         return "main"; // JSP 파일 경로: /WEB-INF/views/main.jsp
     }
 
+    @GetMapping("/password/change")
+    public String changePwdPage(HttpSession session, Model model) {
+        // 세션에서 CSRF 토큰과 이메일 가져오기
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        String email = (String) session.getAttribute("email");
+
+        // 세션에 저장된 값이 없을 경우 처리
+        if (csrfToken == null || email == null) {
+            model.addAttribute("error", "Session expired. Please log in again.");
+            return "redirect:/auth/login";
+        }
+
+        model.addAttribute("csrfToken", csrfToken);
+        model.addAttribute("email", email);
+
+        return "passwordChange"; // JSP 파일 경로: /WEB-INF/views/main.jsp
+    }
+
+    @GetMapping("/update")
+    public String updateProfilePage(HttpSession session, Model model) {
+        // 세션에서 CSRF 토큰과 이메일 가져오기
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        String email = (String) session.getAttribute("email");
+
+        // 세션에 저장된 값이 없을 경우 처리
+        if (csrfToken == null || email == null) {
+            model.addAttribute("error", "Session expired. Please log in again.");
+            return "redirect:/auth/login";
+        }
+
+        model.addAttribute("csrfToken", csrfToken);
+        model.addAttribute("email", email);
+
+        return "profileUpdate"; // JSP 파일 경로: /WEB-INF/views/main.jsp
+    }
 
 
     @PostMapping("/logout/{email}")
@@ -120,30 +152,21 @@ public class AuthController {
         try {
             // 로그아웃 처리
             memberService.logoutMember(email);
-
             // AccessToken 쿠키 초기화
             Cookie accessTokenCookie = new Cookie("accessToken", null);
             accessTokenCookie.setMaxAge(0);
             accessTokenCookie.setPath("/");
             response.addCookie(accessTokenCookie);
-
             // SecurityContext 및 세션 초기화
             SecurityContextHolder.clearContext();
             session.invalidate();
-
-            // 성공 응답
-            return ResponseEntity.ok(Map.of(
-                    "redirectUrl", "/auth/login",
-                    "message", "Logout successful"
-            ));
+            // 성공 응답 메시지
+            return ResponseEntity.ok(Message.success("Logout successful"));
         } catch (Exception e) {
-            // 에러 처리
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "error", "Logout failed"
-            ));
+            // 에러 응답 메시지
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Message.success("Logout failed"));
         }
     }
-
 
     /**
      * PathVariable로 이메일을 받아 Access Token 재발급
@@ -153,7 +176,6 @@ public class AuthController {
      */
     @PostMapping("/reissue/{email}")
     public ResponseEntity<?> reissueAccessToken(@PathVariable("email") String email, HttpServletResponse response) {
-
         try {
             // 이메일로 멤버 검증
             Member member = findMemberByEmail(email);
@@ -163,7 +185,6 @@ public class AuthController {
             Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
             accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
             accessTokenCookie.setMaxAge(6000); // 6000초
-
             // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
             accessTokenCookie.setHttpOnly(true);
             // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
@@ -172,7 +193,6 @@ public class AuthController {
             // SameSite 설정은 Java 11 이상에서 지원됩니다.
             //accessTokenCookie.setAttribute("SameSite", "None");
             response.addCookie(accessTokenCookie);
-
             // 응답 반환
             return ResponseEntity.ok(newAccessToken);
         } catch (MemberException e) {
@@ -180,6 +200,51 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to reissue access token");
         }
+    }
+
+    @DeleteMapping("/delete/{email}")
+    public ResponseEntity<?> deleteMember(@PathVariable String email, HttpServletResponse response, HttpSession session) {
+        try {
+            // 회원 탈퇴 처리
+            memberService.deleteMember(email);
+            // AccessToken 쿠키 초기화
+            Cookie accessTokenCookie = new Cookie("accessToken", null);
+            accessTokenCookie.setMaxAge(0);
+            accessTokenCookie.setPath("/");
+            response.addCookie(accessTokenCookie);
+            // SecurityContext 및 세션 초기화
+            SecurityContextHolder.clearContext();
+            session.invalidate();
+            // 성공 응답 메시지
+            return ResponseEntity.ok(Message.success("Logout successful"));
+        } catch (Exception e) {
+            // 에러 응답 메시지
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Message.success("Delete failed"));
+        }
+    }
+
+    @PatchMapping("/update/{memberId}")
+    public ResponseEntity<?> updateImageAndNicknameMember(@PathVariable Long memberId, @RequestBody MemberUpdateRequest memberUpdateRequest) {
+        try {
+            // 회원 정보 업데이트
+            memberService.updateProfileImageAndNickNameMember(memberId, memberUpdateRequest);
+            // 성공 응답
+            return ResponseEntity.ok(Map.of(
+                    "redirectUrl", "/auth/main",
+                    "message", "Update successful"
+            ));
+        } catch (Exception e) {
+            // 에러 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "error", "Update failed"
+            ));
+        }
+    }
+
+    @PatchMapping("/password/change/{memberId}")
+    public ResponseEntity<Message<Void>> updatePasswordMember(@PathVariable Long memberId, @RequestBody MemberPasswordChangeRequest passwordChangeRequest) {
+        memberService.updatePasswordMember(memberId, passwordChangeRequest);
+        return ResponseEntity.ok().body(Message.success());
     }
 
     private Member findMemberByEmail(String email) {

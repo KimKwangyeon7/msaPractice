@@ -32,6 +32,31 @@
                     }
                 });
             });
+
+            // 회원탈퇴 버튼 클릭 시 요청
+            $('#deleteAccount').click(function () {
+                if (!email) {
+                    alert('이메일 정보가 없습니다!');
+                    return;
+                }
+                if (!confirm('정말로 회원탈퇴를 진행하시겠습니까?')) {
+                    return; // 사용자가 취소를 눌렀을 경우
+                }
+                $.ajax({
+                    url: `http://localhost:8443/member/delete`,
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function (response) {
+                        alert('회원탈퇴가 완료되었습니다.');
+                        window.location.replace("/auth/login"); // 탈퇴 후 회원가입 페이지로 이동
+                    },
+                    error: function (xhr) {
+                        alert(`Account deletion failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
         });
     </script>
 </head>
@@ -39,5 +64,9 @@
 <h1>Welcome to the Main Page</h1>
 <p>This page allows secure actions with CSRF and JWT protection.</p>
 <button id="logout">Logout</button>
+<button id="deleteAccount">Delete Account</button>
+<br><br>
+<button onclick="window.location.href='/auth/password/change'">비밀번호 변경</button>
+<button onclick="window.location.href='/auth/update'">프로필 변경</button>
 </body>
 </html>

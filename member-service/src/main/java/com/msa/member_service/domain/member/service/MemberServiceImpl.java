@@ -1,20 +1,26 @@
 package com.msa.member_service.domain.member.service;
 
 import com.msa.member_service.domain.member.dto.MemberInfo;
+import com.msa.member_service.domain.member.dto.MemberPasswordChangeRequest;
+import com.msa.member_service.domain.member.dto.MemberUpdateRequest;
 import com.msa.member_service.domain.member.entity.Member;
+import com.msa.member_service.domain.member.entity.enums.MemberRole;
 import com.msa.member_service.domain.member.exception.MemberErrorCode;
 import com.msa.member_service.domain.member.exception.MemberException;
 import com.msa.member_service.domain.member.repository.MemberRepository;
+import com.msa.member_service.global.component.oauth.vendor.enums.OAuthDomain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,10 +30,10 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final WebClient authServiceWebClient;
-
-//    private final SimulationRepository simulationRepository;
-//    private final RecommendationRepository recommendationRepository;
-//    private final CommercialAnalysisRepository commercialAnalysisRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final Pattern MEMBER_INFO_PATTERN = Pattern.compile(
+            "MemberInfo\\[id=(\\d+), email=([^,]+), name=(.*?), nickname=(.*?), profileImage=(.*?), role=(.*?), provider=(.*?)]"
+    );
 
     @Override
     public String logoutMember(String memberEmail) {
@@ -40,66 +46,74 @@ public class MemberServiceImpl implements MemberService {
                 .block(); // 동기 처리, 필요에 따라 비동기로 변경 가능
     }
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public MemberInfo getMember(Long memberId) {
-//        Member member = findMemberById(memberId);
-//
-//        return new MemberInfo(
-//                member.getId(),
-//                member.getEmail(),
-//                member.getName(),
-//                member.getNickname(),
-//                member.getProfileImage(),
-//                member.getRole(),
-//                member.getOAuthDomain()
-//        );
-//    }
-//
-//    @Override
-//    public void deleteMember(Long memberId) {
-////        // MongoDB에 저장된 데이터 삭제
-////        simulationRepository.deleteByMemberId(memberId);
-////        recommendationRepository.deleteByUserId(memberId);
-////        commercialAnalysisRepository.deleteByMemberId(memberId);
-//
-//        // JPA에 저장된 데이터 삭제
-//        Member member = findMemberById(memberId);
-//        refreshTokenRepository.delete(member.getEmail());
-//        customCsrfTokenRepository.delete(member.getEmail());
-//        memberRepository.deleteById(memberId);
-//    }
-//
-//    @Override
-//    public void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest) {
-//        Member member = findMemberById(memberId);
-//
-//        member.updateProfileImageAndNickname(updateRequest);
-//    }
-//
-//    @Override
-//    public void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest) {
-//        Member member = findMemberById(memberId);
-//
-//        String realPassword = member.getPassword();
-//
-//        // 현재 비밀번호 제대로 입력했는지 확인
-//        if (!passwordEncoder.matches(passwordChangeRequest.nowPassword(), realPassword)) {
-//            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
-//        }
-//
-//        // 현재 비밀번호와 변경하려는 비밀번호가 같은지 확인 (같은 경우 Exception 발생)
-//        if (passwordEncoder.matches(passwordChangeRequest.changePassword(), realPassword)) {
-//            throw new MemberException(MemberErrorCode.CURRENT_CHANGE_MATCH_PASSWORD);
-//        }
-//
-//        // 비밀번호 변경과 비밀번호 변경 확인 서로 같은지 확인 (다른 경우 Exception 발생)
-//        if (!passwordChangeRequest.changePassword().equals(passwordChangeRequest.changePasswordCheck())) {
-//            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
-//        }
-//
-//        member.updatePassword(passwordEncoder.encode(passwordChangeRequest.changePassword()));
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public MemberInfo getMember(String email) {
+        String value = redisTemplate.opsForValue().get("memberInfo::" + email);
+        if (value == null) {
+            throw new IllegalArgumentException("사용자 정보를 찾을 수 없습니다: " + email);
+        }
+        return parseMemberInfo(value);
+    }
+
+    public MemberInfo parseMemberInfo(String rawData) {
+        Matcher matcher = MEMBER_INFO_PATTERN.matcher(rawData);
+        if (matcher.matches()) {
+            Long id = Long.parseLong(matcher.group(1));
+            String email = matcher.group(2);
+            String name = matcher.group(3);
+            String nickname = matcher.group(4);
+            String profileImage = "null".equals(matcher.group(5)) ? null : matcher.group(5);
+            MemberRole role = MemberRole.valueOf(matcher.group(6));
+            OAuthDomain provider = "null".equals(matcher.group(7)) ? null : OAuthDomain.valueOf(matcher.group(7));
+
+            // 새로운 MemberInfo 객체 생성
+            return new MemberInfo(id, email, name, nickname, profileImage, role, provider);
+        } else {
+            throw new IllegalArgumentException("Invalid MemberInfo format: " + rawData);
+        }
+    }
+
+    @Override
+    public void deleteMember(String memberEmail) {
+//        // MongoDB에 저장된 데이터 삭제
+//        simulationRepository.deleteByMemberId(memberId);
+//        recommendationRepository.deleteByUserId(memberId);
+//        commercialAnalysisRepository.deleteByMemberId(memberId);
+        // JPA에 저장된 데이터 삭제
+        //Member member = findMemberById(memberId);
+        authServiceWebClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/auth/delete/{email}")
+                        .build(memberEmail)) // PathVariable로 이메일을 설정
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // 동기 처리, 필요에 따라 비동기로 변경 가능
+    }
+
+    @Override
+    public void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest) {
+        authServiceWebClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/auth/update/{memberId}")
+                        .build(memberId)) // PathVariable 설정
+                .bodyValue(updateRequest) // RequestBody 설정
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // 동기 처리
+    }
+
+    @Override
+    public void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest) {
+        authServiceWebClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/auth/password/change/{memberId}")
+                        .build(memberId)) // PathVariable 설정
+                .bodyValue(passwordChangeRequest) // RequestBody 설정
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // 동기 처리
+    }
 
     // 인증서버로 통신
     @Override

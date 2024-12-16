@@ -11,9 +11,7 @@ public interface MemberService {
 
     void logoutMember(String email);
 
-    MemberInfo getMember(Long memberId);
-
-    void deleteMember(Long memberId);
+    void deleteMember(String email);
 
     void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest);
 
