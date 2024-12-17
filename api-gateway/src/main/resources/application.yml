@@ -25,20 +25,20 @@ spring:
 #          key-store-type: PKCS12
 #          trusted-x509-certificates:
 #            - classpath:authserver_cert.pem # 인증 서버의 인증서 경로
-#      globalcors:
-#        cors-configurations:
-#          '[/**]':
-#            allowedOrigins:
-#              - 'http://localhost:9443'
-#              - 'http://localhost:8443'
-#            allow-credentials: true
-#            allowedHeaders: "*"
-#            allowedMethods:
-#              - PUT
-#              - GET
-#              - POST
-#              - DELETE
-#              - OPTIONS
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - 'http://localhost:9443'
+              - 'http://localhost:8443'
+            allow-credentials: true
+            allowedHeaders: "*"
+            allowedMethods:
+              - PUT
+              - GET
+              - POST
+              - DELETE
+              - OPTIONS
       routes:
         - id: auth-service
           uri: http://localhost:9443

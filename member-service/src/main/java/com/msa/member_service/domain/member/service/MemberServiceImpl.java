@@ -39,7 +39,7 @@ public class MemberServiceImpl implements MemberService {
     public String logoutMember(String memberEmail) {
         return authServiceWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/logout/{email}")
+                        .path("/auth/member/logout/{email}")
                         .build(memberEmail)) // PathVariable로 이메일을 설정
                 .retrieve()
                 .bodyToMono(String.class)
@@ -84,7 +84,7 @@ public class MemberServiceImpl implements MemberService {
         //Member member = findMemberById(memberId);
         authServiceWebClient.delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/delete/{email}")
+                        .path("/auth/member/delete/{email}")
                         .build(memberEmail)) // PathVariable로 이메일을 설정
                 .retrieve()
                 .bodyToMono(String.class)
@@ -95,7 +95,7 @@ public class MemberServiceImpl implements MemberService {
     public void updateProfileImageAndNickNameMember(Long memberId, MemberUpdateRequest updateRequest) {
         authServiceWebClient.patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/update/{memberId}")
+                        .path("/auth/member/update/{memberId}")
                         .build(memberId)) // PathVariable 설정
                 .bodyValue(updateRequest) // RequestBody 설정
                 .retrieve()
@@ -107,7 +107,7 @@ public class MemberServiceImpl implements MemberService {
     public void updatePasswordMember(Long memberId, MemberPasswordChangeRequest passwordChangeRequest) {
         authServiceWebClient.patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/password/change/{memberId}")
+                        .path("/auth/member/password/change/{memberId}")
                         .build(memberId)) // PathVariable 설정
                 .bodyValue(passwordChangeRequest) // RequestBody 설정
                 .retrieve()
@@ -120,7 +120,7 @@ public class MemberServiceImpl implements MemberService {
     public String reissueAccessToken(String memberEmail) {
         return authServiceWebClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/reissue/{email}")
+                        .path("/auth/member/reissue/{email}")
                         .build(memberEmail)) // PathVariable로 이메일을 설정
                 .retrieve()
                 .bodyToMono(String.class)
