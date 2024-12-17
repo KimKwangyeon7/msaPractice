@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/main").permitAll()
                         .requestMatchers("/auth/member/**").permitAll()
+                        .requestMatchers("/auth/oauth/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
@@ -107,6 +108,7 @@ public class SecurityConfig {
                 new AntPathRequestMatcher("/auth/main"),
                 new AntPathRequestMatcher("/auth/signup"),
                 new AntPathRequestMatcher("/auth/member/**"),
+                new AntPathRequestMatcher("/auth/oauth/**"),
                 new AntPathRequestMatcher("/error")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {

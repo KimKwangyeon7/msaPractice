@@ -22,6 +22,9 @@
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     },
+                    xhrFields: {
+                        withCredentials: true // 쿠키 허용
+                    },
                     success: function (response) {
                         alert(response.message);
                         window.location.replace("/auth/login");
@@ -46,6 +49,9 @@
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
+                    },
+                    xhrFields: {
+                        withCredentials: true // 쿠키 허용
                     },
                     success: function (response) {
                         alert('회원탈퇴가 완료되었습니다.');

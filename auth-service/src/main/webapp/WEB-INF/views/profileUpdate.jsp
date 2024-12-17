@@ -27,9 +27,13 @@
                         profileImage: profileImage,
                         nickname: nickname
                     }),
+                    xhrFields: {
+                        withCredentials: true // 쿠키 허용
+                    },
                     success: function (response) {
                         alert("프로필이 성공적으로 업데이트되었습니다.");
-                        window.location.replace("/auth/main");
+                        // 메인 페이지로 이동
+                        window.location.href = "http://localhost:8443/auth/main";
                     },
                     error: function (xhr) {
                         alert(`프로필 업데이트 실패: ${xhr.status} ${xhr.statusText}`);
