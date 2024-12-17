@@ -70,3 +70,13 @@ logging:
       type.descriptor.sql: trace
       org.hibernate.SQLQuery: debug
 
+
+oauth:
+  kakao:
+    client-id: e1be41bbfbb498c203c87ef3b5a7edc3 # REST API 키
+    client-secret: a6QyXOAtiuidFN4mOt44ZrvuRciYGwCx # 보안 -> Client Secret 키
+    redirect-uri: http://${server.base-url}:8443/auth/oauth/KAKAO/login
+    scope:
+      - profile_nickname
+      - profile_image
+      - account_email

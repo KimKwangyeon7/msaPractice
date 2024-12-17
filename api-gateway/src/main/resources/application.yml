@@ -38,6 +38,7 @@ spring:
               - GET
               - POST
               - DELETE
+              - PATCH
               - OPTIONS
       routes:
         - id: auth-service

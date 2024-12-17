@@ -48,6 +48,25 @@
                 // 회원가입 페이지로 GET 요청
                 window.location.href = "http://localhost:8443/auth/signup";
             });
+            // 카카오 로그인 버튼 클릭 이벤트
+            $('#kakaoLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/KAKAO",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Kakao login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Kakao login failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
         });
     </script>
 </head>
@@ -64,5 +83,11 @@
 <!-- 회원가입 버튼 추가 -->
 <br>
 <button id="signupButton">Sign Up</button>
+<br><br>
+<button id="kakaoLoginButton" style="background-color: #FEE500; border: none; padding: 10px 20px; cursor: pointer;">
+    <img src="https://developers.kakao.com/assets/img/about/logos/kakaologin/ko/kakao_account_login_btn_medium.png"
+         alt="카카오 로그인" style="vertical-align: middle; height: 20px;">
+    카카오 로그인
+</button>
 </body>
 </html>

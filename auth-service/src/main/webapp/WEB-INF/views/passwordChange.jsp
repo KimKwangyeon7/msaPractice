@@ -29,6 +29,9 @@
                         changePassword: changePassword,
                         changePasswordCheck: changePasswordCheck
                     }),
+                    xhrFields: {
+                        withCredentials: true // 쿠키 허용
+                    },
                     success: function (response) {
                         alert("비밀번호가 성공적으로 변경되었습니다.");
                         window.location.replace("/auth/main");
