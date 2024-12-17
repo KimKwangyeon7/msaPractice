@@ -26,8 +26,17 @@
                         withCredentials: true // 쿠키 허용
                     },
                     success: function (response) {
-                        alert(response.message);
-                        window.location.replace("/auth/login");
+                        try {
+                            // JSON 문자열을 파싱
+                            const parsedResponse = JSON.parse(response.dataBody);
+                            const message = parsedResponse.dataBody; // 내부 dataBody 값 추출
+                            alert(message); // Logout successful 출력
+                        } catch (e) {
+                            console.error("Failed to process response", e);
+                            alert("Logout successful"); // 기본 메시지 출력
+                        } finally {
+                            window.location.replace("/auth/login");
+                        }
                     },
                     error: function (xhr) {
                         alert(`Logout failed: ${xhr.status} ${xhr.statusText}`);
