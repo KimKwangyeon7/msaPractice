@@ -9,16 +9,15 @@
         $(document).ready(function () {
             // CSRF 토큰 및 이메일 값 가져오기
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const email = '${email}';
 
             // 로그아웃 버튼 클릭 시 요청
             $('#logout').click(function () {
-                if (!email) {
-                    alert('이메일 정보가 없습니다!');
-                    return;
-                }
+                // if (!email) {
+                //     alert('이메일 정보가 없습니다!');
+                //     return;
+                // }
                 $.ajax({
-                    url: `/member/logout/${email}`,
+                    url: `/member/logout`,
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
@@ -35,10 +34,10 @@
 
             // 회원탈퇴 버튼 클릭 시 요청
             $('#deleteAccount').click(function () {
-                if (!email) {
-                    alert('이메일 정보가 없습니다!');
-                    return;
-                }
+                // if (!email) {
+                //     alert('이메일 정보가 없습니다!');
+                //     return;
+                // }
                 if (!confirm('정말로 회원탈퇴를 진행하시겠습니까?')) {
                     return; // 사용자가 취소를 눌렀을 경우
                 }
@@ -66,7 +65,7 @@
 <button id="logout">Logout</button>
 <button id="deleteAccount">Delete Account</button>
 <br><br>
-<button onclick="window.location.href='/auth/password/change'">비밀번호 변경</button>
-<button onclick="window.location.href='/auth/update'">프로필 변경</button>
+<button onclick="window.location.href='/auth/member/password/change'">비밀번호 변경</button>
+<button onclick="window.location.href='/auth/member/update'">프로필 변경</button>
 </body>
 </html>

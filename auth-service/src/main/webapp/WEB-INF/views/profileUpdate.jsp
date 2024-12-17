@@ -43,10 +43,14 @@
 <h1>프로필 이미지/닉네임 변경</h1>
 <form id="profileUpdateForm">
     <label for="profileImage">프로필 이미지 URL</label>
-    <input type="url" id="profileImage" name="profileImage" placeholder="프로필 이미지 URL을 입력하세요"><br><br>
+    <input type="url" id="profileImage" name="profileImage"
+           placeholder="프로필 이미지 URL을 입력하세요"
+           value="${profileImage}"><br><br> <!-- 기존 프로필 이미지 값 -->
 
     <label for="nickname">닉네임</label>
-    <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력하세요" minlength="2" maxlength="18" required><br><br>
+    <input type="text" id="nickname" name="nickname"
+           placeholder="닉네임을 입력하세요" minlength="2" maxlength="18" required
+           value="${nickname}"><br><br> <!-- 기존 닉네임 값 -->
 
     <button type="submit">변경하기</button>
 </form>

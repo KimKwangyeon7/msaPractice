@@ -8,6 +8,7 @@ import com.msa.auth_service.domain.member.exception.MemberException;
 import com.msa.auth_service.domain.member.repository.MemberRepository;
 import com.msa.auth_service.domain.member.service.MemberService;
 import com.msa.auth_service.global.common.dto.Message;
+import com.msa.auth_service.global.component.jwt.JwtTokenProvider;
 import com.msa.auth_service.global.component.jwt.security.MemberLoginActive;
 import com.msa.auth_service.global.component.jwt.service.JwtTokenService;
 import jakarta.servlet.http.Cookie;
@@ -39,6 +40,7 @@ public class AuthController {
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtTokenService jwtTokenService;
     private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/validate")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -109,7 +111,7 @@ public class AuthController {
         return "main"; // JSP 파일 경로: /WEB-INF/views/main.jsp
     }
 
-    @GetMapping("/password/change")
+    @GetMapping("/member/password/change")
     public String changePwdPage(HttpSession session, Model model) {
         // 세션에서 CSRF 토큰과 이메일 가져오기
         String csrfToken = (String) session.getAttribute("csrfToken");
@@ -127,7 +129,7 @@ public class AuthController {
         return "passwordChange"; // JSP 파일 경로: /WEB-INF/views/main.jsp
     }
 
-    @GetMapping("/update")
+    @GetMapping("/member/update")
     public String updateProfilePage(HttpSession session, Model model) {
         // 세션에서 CSRF 토큰과 이메일 가져오기
         String csrfToken = (String) session.getAttribute("csrfToken");
@@ -138,7 +140,10 @@ public class AuthController {
             model.addAttribute("error", "Session expired. Please log in again.");
             return "redirect:/auth/login";
         }
+        Member member = findMemberByEmail(email);
 
+        model.addAttribute("profile", member.getProfileImage());
+        model.addAttribute("nickname", member.getNickname());
         model.addAttribute("csrfToken", csrfToken);
         model.addAttribute("email", email);
 
@@ -146,7 +151,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/logout/{email}")
+    @PostMapping("/member/logout/{email}")
     public ResponseEntity<?> logout(@PathVariable String email,
                                     HttpServletResponse response, HttpSession session) {
         try {
@@ -174,7 +179,7 @@ public class AuthController {
      * @param email 이메일 주소
      * @return 새롭게 발급된 Access Token
      */
-    @PostMapping("/reissue/{email}")
+    @PostMapping("/member/reissue/{email}")
     public ResponseEntity<?> reissueAccessToken(@PathVariable("email") String email, HttpServletResponse response) {
         try {
             // 이메일로 멤버 검증
@@ -202,7 +207,7 @@ public class AuthController {
         }
     }
 
-    @DeleteMapping("/delete/{email}")
+    @DeleteMapping("/member/delete/{email}")
     public ResponseEntity<?> deleteMember(@PathVariable String email, HttpServletResponse response, HttpSession session) {
         try {
             // 회원 탈퇴 처리
@@ -223,7 +228,7 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("/update/{memberId}")
+    @PatchMapping("/member/update/{memberId}")
     public ResponseEntity<?> updateImageAndNicknameMember(@PathVariable Long memberId, @RequestBody MemberUpdateRequest memberUpdateRequest) {
         try {
             // 회원 정보 업데이트
@@ -241,7 +246,7 @@ public class AuthController {
         }
     }
 
-    @PatchMapping("/password/change/{memberId}")
+    @PatchMapping("/member/password/change/{memberId}")
     public ResponseEntity<Message<Void>> updatePasswordMember(@PathVariable Long memberId, @RequestBody MemberPasswordChangeRequest passwordChangeRequest) {
         memberService.updatePasswordMember(memberId, passwordChangeRequest);
         return ResponseEntity.ok().body(Message.success());

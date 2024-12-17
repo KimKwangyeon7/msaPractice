@@ -66,14 +66,9 @@ public class SecurityConfig {
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/logout/**").permitAll()
                         .requestMatchers("/auth/signup").permitAll()
                         .requestMatchers("/auth/main").permitAll()
-                        .requestMatchers("/auth/delete/**").permitAll()
-                        .requestMatchers("/auth/password/**").permitAll()
-                        .requestMatchers("/auth/update/**").permitAll()
-                        .requestMatchers("/auth/get").permitAll()
-                        .requestMatchers("/auth/reissue/**").permitAll()
+                        .requestMatchers("/auth/member/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
@@ -108,20 +103,11 @@ public class SecurityConfig {
         RequestMatcher excludedMatcher = new OrRequestMatcher(
                 new AntPathRequestMatcher("/WEB-INF/**"), // JSP 파일 경로 제공
                 new AntPathRequestMatcher("/favicon.ico"),
-                new AntPathRequestMatcher("/auth/login", "GET"),
-                new AntPathRequestMatcher("/auth/login", "POST"), // JSP 로그인 요청 제외
-                new AntPathRequestMatcher("/auth/main", "GET"),
-                new AntPathRequestMatcher("/auth/signup", "GET"),
-                new AntPathRequestMatcher("/auth/signup", "POST"),
-                new AntPathRequestMatcher("/auth/logout/**", "POST"),
-                new AntPathRequestMatcher("/auth/delete/**", "DELETE"),
-                new AntPathRequestMatcher("/auth/reissue/**", "DELETE"),
-                new AntPathRequestMatcher("/auth/update/**", "PATCH"),
-                new AntPathRequestMatcher("/auth/password/**", "PATCH"),
-                new AntPathRequestMatcher("/auth/update/**", "GET"),
-                new AntPathRequestMatcher("/auth/password/**", "GET"),
-                new AntPathRequestMatcher("/auth/get", "GET"),
-                new AntPathRequestMatcher("/error", "GET")
+                new AntPathRequestMatcher("/auth/login"),
+                new AntPathRequestMatcher("/auth/main"),
+                new AntPathRequestMatcher("/auth/signup"),
+                new AntPathRequestMatcher("/auth/member/**"),
+                new AntPathRequestMatcher("/error")
         );
         return new JwtTokenSecurityFilter(jwtTokenProvider, objectMapper, customCsrfTokenRepository) {
             @Override
