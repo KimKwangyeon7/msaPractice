@@ -67,6 +67,46 @@
                     }
                 });
             });
+
+            // 네이버 로그인 버튼 클릭 이벤트
+            $('#naverLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/NAVER",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Naver login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Naver login failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
+
+            // 구글 로그인 버튼 클릭 이벤트
+            $('#googleLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/GOOGLE",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Google login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Google login failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
         });
     </script>
 </head>
@@ -84,10 +124,56 @@
 <br>
 <button id="signupButton">Sign Up</button>
 <br><br>
-<button id="kakaoLoginButton" style="background-color: #FEE500; border: none; padding: 10px 20px; cursor: pointer;">
-    <img src="https://developers.kakao.com/assets/img/about/logos/kakaologin/ko/kakao_account_login_btn_medium.png"
-         alt="카카오 로그인" style="vertical-align: middle; height: 20px;">
+<button id="kakaoLoginButton" style="
+    background-color: #FEE500;
+    color: #3A1D1D;
+    border: 1px solid #E4BB00;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+">
     카카오 로그인
+</button>
+<br>
+
+<button id="naverLoginButton" style="
+    background-color: #03C75A;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+">
+    네이버 로그인
+</button>
+<br>
+<button id="googleLoginButton" style="
+    background-color: white;
+    color: #4285F4;
+    border: 1px solid #DADCE0;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+">
+    구글 로그인
 </button>
 </body>
 </html>
