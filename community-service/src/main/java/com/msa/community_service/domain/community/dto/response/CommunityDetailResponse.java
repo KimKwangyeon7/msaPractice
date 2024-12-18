@@ -26,15 +26,13 @@ public class CommunityDetailResponse {
     private List<ImageInfo> images;
 
 
-    public CommunityDetailResponse(Long communityId, Category category, String title, String content, int readCount, Long writerId, String writerNickname, String writerProfileImage, LocalDateTime createdAt) {
+    public CommunityDetailResponse(Long communityId, Category category, String title, String content, int readCount, Long writerId, LocalDateTime createdAt) {
         this.communityId = communityId;
         this.category = category;
         this.title = title;
         this.content = content;
         this.readCount = readCount;
         this.writerId = writerId;
-        this.writerNickname = writerNickname;
-        this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
     }
 

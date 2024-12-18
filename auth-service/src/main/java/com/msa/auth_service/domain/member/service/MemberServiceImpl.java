@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -147,6 +148,16 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(MemberErrorCode.PASSWORD_CONFIRMATION_MISMATCH);
         }
         member.updatePassword(passwordEncoder.encode(passwordChangeRequest.changePassword()));
+    }
+
+    @Override
+    public List<MemberInfoResponse> findMembersByIds(List<Long> memberIds) {
+        return memberRepository.getMemberInfoResponsesList(memberIds);
+    }
+
+    @Override
+    public MemberInfoResponse findMemberInfoById(Long writerId) {
+        return memberRepository.getMemberInfoResponse(writerId);
     }
 
     private Member findMemberByEmail(String email) {
