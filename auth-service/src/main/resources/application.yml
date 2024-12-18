@@ -80,3 +80,20 @@ oauth:
       - profile_nickname
       - profile_image
       - account_email
+
+  naver:
+    client-id: x9qq5Pv4FAaKJ5ucg7nb
+    client-secret: XBXvtSGQ_y
+    redirect_uri: http://${server.base-url}:8443/auth/oauth/NAVER/login
+    scope:
+      - nickname
+      - name
+      - email
+      - profile_image
+  google:
+    client_id: 1024320194618-l8oie7ap8j0p36utia6jr0bup4md6t7s.apps.googleusercontent.com
+    client_secret: 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
+    redirect_uri: http://${server.base-url}:8443/auth/oauth/GOOGLE/login
+    scope:
+      - profile
+      - email
