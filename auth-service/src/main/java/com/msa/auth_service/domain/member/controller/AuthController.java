@@ -30,7 +30,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -290,5 +292,25 @@ public class AuthController {
             }
         }
         return null;
+    }
+
+    @PostMapping("/member/batch")
+    public ResponseEntity<List<MemberInfoResponse>> getMembersByIds(@RequestBody List<Long> writerIds) {
+        //System.out.println(writerIds.size());
+        if (writerIds == null || writerIds.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // 요청된 ID가 없으면 400 Bad Request 반환
+        }
+        List<MemberInfoResponse> responses = memberService.findMembersByIds(writerIds);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/member/{writerId}")
+    public ResponseEntity<MemberInfoResponse> getMemberInfoById(@PathVariable Long writerId) {
+        //System.out.println(writerId.size());
+        if (writerId == null) {
+            return ResponseEntity.badRequest().build(); // 요청된 ID가 없으면 400 Bad Request 반환
+        }
+        MemberInfoResponse response = memberService.findMemberInfoById(writerId);
+        return ResponseEntity.ok(response);
     }
 }

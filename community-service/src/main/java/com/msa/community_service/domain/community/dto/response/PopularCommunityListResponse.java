@@ -23,7 +23,6 @@ public class PopularCommunityListResponse {
 
     public PopularCommunityListResponse(Long communityId, Category category, String title,
                                  String content, Long writerId,
-                                 String writerNickname, String profileImage,
                                  int readCount, int commentCount) {
         this.communityId = communityId;
         this.category = category;
@@ -35,8 +34,6 @@ public class PopularCommunityListResponse {
 
         this.content = content;
         this.writerId = writerId;
-        this.writerNickname = writerNickname;
-        this.profileImage = profileImage;
         this.readCount = readCount;
         this.commentCount = commentCount;
     }
