@@ -294,7 +294,7 @@ public class AuthController {
         return null;
     }
 
-    @PostMapping("/member/batch")
+    @PostMapping("/member/community")
     public ResponseEntity<List<MemberInfoResponse>> getMembersByIds(@RequestBody List<Long> writerIds) {
         //System.out.println(writerIds.size());
         if (writerIds == null || writerIds.isEmpty()) {
@@ -304,7 +304,7 @@ public class AuthController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/member/{writerId}")
+    @GetMapping("/member/community/{writerId}")
     public ResponseEntity<MemberInfoResponse> getMemberInfoById(@PathVariable Long writerId) {
         //System.out.println(writerId.size());
         if (writerId == null) {

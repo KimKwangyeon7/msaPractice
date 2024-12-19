@@ -24,14 +24,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Long createComment(Long memberId, Long communityId, String content) {
-//        Member writer = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Long writerId = 1L;
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityException(CommunityErrorCode.NOT_EXIST_COMMUNITY));
 
         Comments comment = Comments.builder()
-                .writerId(writerId)
+                .writerId(memberId)
                 .community(community)
                 .content(content)
                 .build();
@@ -46,11 +43,13 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.selectCommentList(communityId, lastId);
     }
 
+    @Transactional
     @Override
     public void deleteComment(Long commentId) {
         commentRepository.deleteById(commentId);
     }
 
+    @Transactional
     @Override
     public void updateComment(Long commentId, UpdateCommentRequest request) {
         Comments comments = commentRepository.findById(commentId)

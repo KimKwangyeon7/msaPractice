@@ -98,7 +98,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
         try {
             return webClient.post()
-                    .uri("/auth/member/batch") // 배치 조회를 위한 엔드포인트
+                    .uri("/auth/member/community") // 배치 조회를 위한 엔드포인트
                     .bodyValue(writerIds)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<List<MemberInfoResponse>>() {})
@@ -230,7 +230,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         try {
             return webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/auth//member/{writerId}")
+                            .path("/auth//member/community/{writerId}")
                             .build(writerId))
                     .retrieve()
                     .bodyToMono(MemberInfoResponse.class)
