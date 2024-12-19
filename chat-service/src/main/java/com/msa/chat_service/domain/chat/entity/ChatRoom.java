@@ -1,0 +1,42 @@
+package com.msa.chat_service.domain.chat.entity;
+
+import com.msa.chat_service.domain.member.entity.enums.Category;
+import com.msa.chat_service.global.common.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.Comment;
+
+@Entity
+@Getter
+@Builder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class ChatRoom extends BaseEntity {
+    @Id
+    @Comment("채팅방 아이디")
+    @Column(columnDefinition = "INT UNSIGNED")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Comment("카테고리")
+    @Column(columnDefinition = "VARCHAR(20)", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @Comment("채팅방 이름")
+    @Column(name = "chat_room_name", columnDefinition = "VARCHAR(20)")
+    private String name;
+
+    @Comment("채팅방 소개")
+    @Column(name = "chat_room_introduction", columnDefinition = "VARCHAR(40)")
+    private String introduction;
+
+    @Comment("채팅방 제한 인원수")
+    @Column(name = "chat_room_limit", columnDefinition = "INT UNSIGNED")
+    private int limit;
+
+    public boolean isFull(int memberCount) {
+        return limit <= memberCount;
+    }
+}
+

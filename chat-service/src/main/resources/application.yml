@@ -1,0 +1,89 @@
+#spring.application.name=community-service
+server:
+  base-url: localhost
+  port: 9003
+spring:
+  application:
+    name: chat-service
+  devtools:
+    restart:
+      enabled: false
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/ # Eureka ?? ??
+      instance:
+        hostname: localhost
+        prefer-ip-address: true
+
+  servlet:
+    # file ??? ?? ?? (????? ?? ?? ? Spring boot? ????? 1MB? ???)
+    multipart:
+      max-file-size: 10MB  # ?? ?? ??
+      max-request-size: 10MB  # ?? ?? ??
+
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update          # ddl ?? ?? ??
+    properties:
+      hibernate:
+        format_sql: true             # ??????? ??? SQL? ??? ? ?? ?? ??
+        use_sql_comments: true
+        show_sql: true               # ??????? ??? SQL? ??
+        jdbc:
+          batch_size: 100              #   insert/update ??? ??? ???? ??? DB? ?? ? ?? ??
+        default_batch_fetch_size: 100
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver  # DB ????
+    url: jdbc:mysql://${server.base-url}:3306/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # ?????? URL
+    username: root                    # ?????? ???
+    password: 8llow8llowme
+
+  # NoSQL setting
+  data:
+    # Redis setting
+    redis:
+      host: ${server.base-url}
+      port: 6379
+
+  # JSP Setting
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+  # Kafka setting
+  kafka:
+    bootstrap-servers: ${server.base-url}:9092, ${server.base-url}:9093, ${server.base-url}:9094
+    consumer:
+      group-id: NowDoBossGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# log ??
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate:
+      type.descriptor.sql: trace
+      org.hibernate.SQLQuery: debug
+
+jwt:
+  accessKey: "w7Dd0jmlEjFvWfnH8xCyAaD4J9KeShMQEfK5TZZjbgM="
+  refreshKey: "YrLk76XDh9TaBtKxN+WxMr1Zm+zKlOPUv6RJqz9TZYI="
+  accessExpiration: PT420M  # 420? (PT420M)
+  refreshExpiration: PT10080M  # 10080? (7?) (PT10080M)
+
