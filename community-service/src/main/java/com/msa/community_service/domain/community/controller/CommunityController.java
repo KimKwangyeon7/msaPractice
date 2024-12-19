@@ -57,8 +57,13 @@ public class CommunityController {
 //            description = "커뮤니티 게시글 목록을 조회하는 기능입니다."
 //    )
     @GetMapping
-    public ResponseEntity<Message<List<CommunityListResponse>>> selectCommunityList(CommunityListRequest request) {
-        return ResponseEntity.ok().body(Message.success(communityService.selectCommunityList(request)));
+    public ResponseEntity<Message<List<CommunityListResponse>>> selectCommunityList(HttpServletRequest request, CommunityListRequest communityListRequest) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
+        }
+        return ResponseEntity.ok().body(Message.success(communityService.selectCommunityList(communityListRequest)));
     }
 
 //    @Operation(
@@ -66,7 +71,12 @@ public class CommunityController {
 //            description = "커뮤니티 인기 게시글을 조회하는 기능입니다."
 //    )
     @GetMapping("/popular")
-    public ResponseEntity<Message<List<PopularCommunityListResponse>>> selectPopularCommunityList() {
+    public ResponseEntity<Message<List<PopularCommunityListResponse>>> selectPopularCommunityList(HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
+        }
         return ResponseEntity.ok().body(Message.success(communityService.selectPopularCommunityList()));
     }
 
@@ -75,7 +85,12 @@ public class CommunityController {
 //            description = "커뮤니티 게시글을 상세 조회하는 기능입니다."
 //    )
     @GetMapping("/{communityId}")
-    public ResponseEntity<Message<CommunityDetailResponse>> selectCommunity(@PathVariable Long communityId) {
+    public ResponseEntity<Message<CommunityDetailResponse>> selectCommunity(HttpServletRequest request, @PathVariable Long communityId) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
+        }
         return ResponseEntity.ok().body(Message.success(communityService.selectCommunity(communityId)));
     }
 
@@ -84,8 +99,13 @@ public class CommunityController {
 //            description = "커뮤니티 게시글을 삭제하는 기능입니다."
 //    )
     @DeleteMapping("/{communityId}")
-    public ResponseEntity<Message<Void>> deleteCommunity(@PathVariable Long communityId) {
-        communityService.deleteCommunity(communityId);
+    public ResponseEntity<Message<Void>> deleteCommunity(@PathVariable Long communityId, HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success());
+        }
+        communityService.deleteCommunity(communityId, memberLoginActive);
         return ResponseEntity.ok().body(Message.success());
     }
 
@@ -95,8 +115,13 @@ public class CommunityController {
 //    )
     @PatchMapping("/{communityId}")
     public ResponseEntity<Message<Void>> updateCommunity(@PathVariable Long communityId,
-                                                         @Validated @RequestBody UpdateCommunityRequest request) {
-        communityService.updateCommunity(communityId, request);
+                                                         @Validated @RequestBody UpdateCommunityRequest updateCommunityRequest, HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success());
+        }
+        communityService.updateCommunity(communityId, updateCommunityRequest, memberLoginActive);
         return ResponseEntity.ok().body(Message.success());
     }
 

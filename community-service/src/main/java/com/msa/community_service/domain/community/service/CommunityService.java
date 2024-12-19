@@ -2,6 +2,7 @@ package com.msa.community_service.domain.community.service;
 
 
 
+import com.msa.community_service.domain.community.dto.info.MemberLoginActive;
 import com.msa.community_service.domain.community.dto.request.CommunityListRequest;
 import com.msa.community_service.domain.community.dto.request.CreateCommunityRequest;
 import com.msa.community_service.domain.community.dto.request.UpdateCommunityRequest;
@@ -18,7 +19,7 @@ public interface CommunityService {
     List<PopularCommunityListResponse> selectPopularCommunityList();
     CommunityDetailResponse selectCommunity(Long communityId);
 
-    void updateCommunity(Long communityId, UpdateCommunityRequest request);
+    void updateCommunity(Long communityId, UpdateCommunityRequest request, MemberLoginActive memberLoginActive);
 
-    void deleteCommunity(Long communityId);
+    void deleteCommunity(Long communityId, MemberLoginActive memberLoginActive);
 }
