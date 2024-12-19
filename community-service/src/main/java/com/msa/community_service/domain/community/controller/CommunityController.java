@@ -57,12 +57,7 @@ public class CommunityController {
 //            description = "커뮤니티 게시글 목록을 조회하는 기능입니다."
 //    )
     @GetMapping
-    public ResponseEntity<Message<List<CommunityListResponse>>> selectCommunityList(HttpServletRequest request, CommunityListRequest communityListRequest) {
-        String accessToken = getAccessToken(request);
-        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
-        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
-        }
+    public ResponseEntity<Message<List<CommunityListResponse>>> selectCommunityList(CommunityListRequest communityListRequest) {
         return ResponseEntity.ok().body(Message.success(communityService.selectCommunityList(communityListRequest)));
     }
 
@@ -71,12 +66,7 @@ public class CommunityController {
 //            description = "커뮤니티 인기 게시글을 조회하는 기능입니다."
 //    )
     @GetMapping("/popular")
-    public ResponseEntity<Message<List<PopularCommunityListResponse>>> selectPopularCommunityList(HttpServletRequest request) {
-        String accessToken = getAccessToken(request);
-        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
-        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
-        }
+    public ResponseEntity<Message<List<PopularCommunityListResponse>>> selectPopularCommunityList() {
         return ResponseEntity.ok().body(Message.success(communityService.selectPopularCommunityList()));
     }
 
@@ -85,12 +75,7 @@ public class CommunityController {
 //            description = "커뮤니티 게시글을 상세 조회하는 기능입니다."
 //    )
     @GetMapping("/{communityId}")
-    public ResponseEntity<Message<CommunityDetailResponse>> selectCommunity(HttpServletRequest request, @PathVariable Long communityId) {
-        String accessToken = getAccessToken(request);
-        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
-        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success(null));
-        }
+    public ResponseEntity<Message<CommunityDetailResponse>> selectCommunity(@PathVariable Long communityId) {
         return ResponseEntity.ok().body(Message.success(communityService.selectCommunity(communityId)));
     }
 
@@ -130,10 +115,14 @@ public class CommunityController {
 //            description = "커뮤니티 댓글을 작성하는 기능입니다."
 //    )
     @PostMapping("/{communityId}/comment")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Message<Void>> createComment(@PathVariable Long communityId,
-                                                       @Validated @RequestBody CreateCommentRequest request) {
-        //commentService.createComment(loginActive.id(), communityId, request.content());
+                                                       @Validated @RequestBody CreateCommentRequest createCommentRequest, HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success());
+        }
+        commentService.createComment(memberLoginActive.id(), communityId, createCommentRequest.content());
         return ResponseEntity.ok().body(Message.success());
     }
 
