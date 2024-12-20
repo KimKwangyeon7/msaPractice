@@ -78,6 +78,9 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 	// kafka streams
 	implementation 'org.apache.kafka:kafka-streams'
+
+	// Firebase
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 }
 
 
