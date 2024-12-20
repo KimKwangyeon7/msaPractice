@@ -73,6 +73,12 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+# firebase setting
+app:
+  firebase-configuration-file: classpath:serviceAccountKey.json
+#  firebase-bucket: ENC(kEjE5eNrPFCEldmd4VOt0mXnXI2qkPVNJIhOBdW8K60=)
+  firebase-project-id: msapractice-cecd2
+
 # log ??
 logging:
   level:
