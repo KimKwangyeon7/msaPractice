@@ -25,8 +25,7 @@ public class ChatMessageResponse {
     private String senderNickname;
     private String senderProfileImage;
 
-    public static ChatMessageResponse of(ChatMessage message) {
-        Member sender = message.getSender();
+    public static ChatMessageResponse of(ChatMessage message, Member sender) {
         ChatRoom chatRoom = message.getChatRoom();
         return ChatMessageResponse.builder()
                 .chatMessageId(message.getId())

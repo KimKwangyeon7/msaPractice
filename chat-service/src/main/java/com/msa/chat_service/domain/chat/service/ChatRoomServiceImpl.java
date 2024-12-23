@@ -16,6 +16,7 @@ import com.msa.chat_service.domain.chat.repository.ChatRoomMemberRepository;
 import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.member.entity.Member;
 import com.msa.chat_service.domain.member.entity.enums.Category;
+import com.msa.chat_service.domain.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         Member sender = null;
 
         chatRoomMemberRepository.save(ChatRoomMember.builder()
-                .memberId(sender.getId())
+                .memberId(memberId)
                 .chatRoom(chatRoom)
                 .build());
 
@@ -73,7 +74,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public EnterChatRoomResponse enterChatRoom(Long memberId, Long chatRoomId) {
 //        Member member = memberRepository.findById(memberId)
 //                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member member = null;
+        Member member = new Member(memberId, "email@eamil", "nickname", null, MemberRole.valueOf("USER"));
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
@@ -84,10 +85,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ChatErrorCode.FULL_CHAT_ROOM);
         }
 
-        if (!chatRoomMemberRepository.existsByMemberAndChatRoom(member, chatRoom)) {
+        if (!chatRoomMemberRepository.existsByMemberIdAndChatRoom(memberId, chatRoom)) {
             chatRoomMemberRepository.save(ChatRoomMember
                     .builder()
-                    .memberId(member.getId())
+                    .memberId(memberId)
                     .chatRoom(chatRoom)
                     .build());
             ChatMessage enterMessage = ChatMessage.createEnterMessage(member, chatRoom);
@@ -118,7 +119,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatMessageService.processMessage(exitMessage);
 
         // 구성원 제거
-        chatRoomMemberRepository.deleteByMemberAndChatRoom(member, chatRoom);
+        chatRoomMemberRepository.deleteByMemberIdAndChatRoom(memberId, chatRoom);
 
         if (!chatRoomMemberRepository.existsByChatRoom(chatRoom)) {
             // 채팅 메시지 삭제
