@@ -57,12 +57,12 @@ spring:
             - Path=/community/**
           filters:
             - name: AuthValidationFilter
-        - id: chat-service
-          uri: lb://chat-service
-          predicates:
-            - Path=/chat/**
-          filters:
-            - name: AuthValidationFilter
+#        - id: chat-service
+#          uri: lb://chat-service
+#          predicates:
+#            - Path=/chat/**
+#          filters:
+#            - name: AuthValidationFilter
 
     discovery:
       locator:

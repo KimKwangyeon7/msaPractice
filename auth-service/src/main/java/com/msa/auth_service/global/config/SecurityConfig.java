@@ -173,6 +173,7 @@ public class SecurityConfig {
         // 모든 출처에서 오는 요청을 허용합니다. 구체적인 출처를 지정하는 것이 권장됩니다.
         config.addAllowedOrigin("http://localhost:8443");
         config.addAllowedOrigin("http://localhost:9001");
+        config.addAllowedOrigin("http://localhost:9003");
         // 모든 요청 헤더를 허용합니다. 클라이언트가 요청에 다양한 종류의 헤더를 포함시킬 수 있습니다.
         config.addAllowedHeader("*");
         // 모든 HTTP 메서드를 허용합니다. 이를 통해 RESTful API 지원이 강화됩니다.
