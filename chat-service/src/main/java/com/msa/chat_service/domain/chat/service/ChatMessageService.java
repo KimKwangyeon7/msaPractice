@@ -10,5 +10,5 @@ import java.util.List;
 public interface ChatMessageService {
     List<ChatMessageResponse> selectChatMessages(Long chatRoomId, Long lastId);
     void send(String topic, ChatMessageRequest request);
-    void processMessage(ChatMessage chatMessage);
+    void processMessage(ChatMessage chatMessage, Long memberId);
 }

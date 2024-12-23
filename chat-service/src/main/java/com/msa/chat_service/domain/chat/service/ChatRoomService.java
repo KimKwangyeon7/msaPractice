@@ -16,6 +16,6 @@ public interface ChatRoomService {
     ChatRoomResponse selectChatRoomDetail(Long chatRoomId);
     Long createChatRoom(Long memberId, CreateChatRoomRequest request);
     List<ChatRoomResponse> selectPopularChatRoom(String category);
-    EnterChatRoomResponse enterChatRoom(Long memberId, Long chatRoomId);
-    void exitChatRoom(Long memberId, Long chatRoomId);
+    EnterChatRoomResponse enterChatRoom(Long memberId, String nickname, Long chatRoomId);
+    void exitChatRoom(Long memberId, String nickname, Long chatRoomId);
 }
