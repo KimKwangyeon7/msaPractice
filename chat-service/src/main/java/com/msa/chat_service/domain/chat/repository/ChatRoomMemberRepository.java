@@ -12,14 +12,14 @@ import java.util.Optional;
 
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, Long>, CustomChatRoomMemberRepository {
     @Lock(LockModeType.OPTIMISTIC)
-    Optional<ChatRoomMember> findLockByMemberAndChatRoom(Member member, ChatRoom chatRoom);
-    Optional<ChatRoomMember> findByMemberAndChatRoom(Member member, ChatRoom chatRoom);
+    Optional<ChatRoomMember> findLockByMemberIdAndChatRoom(Long member, ChatRoom chatRoom);
+    Optional<ChatRoomMember> findByMemberIdAndChatRoom(Long member, ChatRoom chatRoom);
 
-    void deleteByMemberAndChatRoom(Member member, ChatRoom chatRoom);
+    void deleteByMemberIdAndChatRoom(Long member, ChatRoom chatRoom);
 
     boolean existsByChatRoom(ChatRoom chatRoom);
 
-    boolean existsByMemberAndChatRoom(Member member, ChatRoom chatRoom);
+    boolean existsByMemberIdAndChatRoom(Long member, ChatRoom chatRoom);
 
     int countByChatRoom(ChatRoom chatRoom);
 }

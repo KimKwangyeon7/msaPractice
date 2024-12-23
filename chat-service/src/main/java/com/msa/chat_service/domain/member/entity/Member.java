@@ -53,6 +53,15 @@ public class Member extends BaseEntity {
     @Comment("소셜 로그인 제공업체")
     private OAuthDomain oAuthDomain;
 
+    public Member(Long memberId, String email, String nickname, String profileImage, MemberRole user) {
+        super();
+        this.id = memberId;
+        this.email = email;
+        this.nickname = nickname;
+        this.profileImage = profileImage;
+        this.role = user;
+    }
+
 //    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<ChatMessage> chatMessages = new ArrayList<>();
 //

@@ -8,17 +8,49 @@ import com.msa.chat_service.domain.chat.service.ChatRoomService;
 import com.msa.chat_service.global.common.dto.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/chat-rooms")
+@RequestMapping("/chat")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
+
+    /**
+     * 채팅 서비스 메인 페이지로 이동
+     */
+    @GetMapping("/index")
+    public String index(Model model) {
+        // 필요한 데이터를 모델에 추가할 수 있음
+        // 예: 모든 채팅방 목록 전달
+        model.addAttribute("chatRooms", getChatRooms()); // getChatRooms()는 가상의 메서드
+        return "index"; // index.jsp로 이동
+    }
+
+    /**
+     * 특정 채팅방 페이지로 이동
+     */
+    @GetMapping("/room/{chatRoomId}")
+    public String chatRoom(@PathVariable Long chatRoomId, Model model) {
+        // 채팅방 ID를 모델에 추가
+        model.addAttribute("chatRoomId", chatRoomId);
+        return "chat-room"; // chatRoom.jsp로 이동
+    }
+
+    /**
+     * 모든 채팅방 목록 반환 (가상의 메서드)
+     * 실제로는 서비스나 DB에서 데이터를 가져와야 함
+     */
+    private List<String> getChatRooms() {
+        // 가상의 데이터. 실제로는 DB나 서비스에서 가져와야 함
+        return List.of("Room 1", "Room 2", "Room 3");
+    }
 
 //    @Operation(
 //            summary = "채팅방 목록 조회",
@@ -62,9 +94,10 @@ public class ChatRoomController {
     public ResponseEntity<Message<CreateChatRoomResponse>> createChatRoom(@Validated @RequestBody CreateChatRoomRequest request) {
 
         //Long chatRoomId = chatRoomService.createChatRoom(loginActive.id(), request);
-        //CreateChatRoomResponse response = new CreateChatRoomResponse(chatRoomId);
-        //return ResponseEntity.ok().body(Message.success(response));
-        return null;
+        Long chatRoomId = chatRoomService.createChatRoom(2L, request);
+        CreateChatRoomResponse response = new CreateChatRoomResponse(chatRoomId);
+        return ResponseEntity.ok().body(Message.success(response));
+        //return null;
     }
 
 //    @Operation(

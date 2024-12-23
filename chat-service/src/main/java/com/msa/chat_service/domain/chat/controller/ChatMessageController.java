@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
 
-    @MessageMapping("/message/{roomId}")
+//    @MessageMapping("/chat/message/{roomId}")
+//    public void sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageRequest request) {
+//        chatMessageService.send(KafkaConstants.KAFKA_TOPIC, request);
+//    }
+    @MessageMapping("/chat/message/{roomId}")
     public void sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageRequest request) {
         chatMessageService.send(KafkaConstants.KAFKA_TOPIC, request);
     }

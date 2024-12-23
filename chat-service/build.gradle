@@ -53,7 +53,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	//developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -75,7 +75,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	// Kafka
-	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.kafka:spring-kafka:3.3.0' // Kafka 의존성
+	implementation 'com.fasterxml.jackson.core:jackson-databind'  // JSON 직렬화/역직렬화 의존성
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	// kafka streams
 	implementation 'org.apache.kafka:kafka-streams'
 

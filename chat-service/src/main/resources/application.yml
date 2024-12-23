@@ -2,12 +2,10 @@
 server:
   base-url: localhost
   port: 9003
+
 spring:
   application:
     name: chat-service
-  devtools:
-    restart:
-      enabled: false
   eureka:
     client:
       service-url:
@@ -58,20 +56,26 @@ spring:
 
   # Kafka setting
   kafka:
-    bootstrap-servers: ${server.base-url}:9092, ${server.base-url}:9093, ${server.base-url}:9094
+    bootstrap-servers: ${server.base-url}:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 키값 직렬화방법
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: NowDoBossGroup
+      group-id: chat-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
         spring:
           json:
             trusted:
               packages: '*'
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          deserializer:
+            value:
+              delegate:
+                class: org.springframework.kafka.support.serializer.JsonDeserializer
+
+
 
 # firebase setting
 app:
