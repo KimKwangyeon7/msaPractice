@@ -9,6 +9,7 @@ import com.msa.chat_service.domain.chat.exception.ChatException;
 import com.msa.chat_service.domain.chat.repository.ChatMessageRepository;
 import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.member.entity.Member;
+import com.msa.chat_service.domain.member.entity.enums.MemberRole;
 import com.msa.chat_service.domain.member.exception.MemberErrorCode;
 import com.msa.chat_service.domain.member.exception.MemberException;
 import com.msa.chat_service.global.component.kafka.KafkaConstants;
@@ -43,7 +44,8 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     public void send(String topic, ChatMessageRequest request) {
 //        Member member = memberRepository.findById(request.getSenderId())
 //                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member member = null;
+        Member member = new Member(2L, "email@eamil", "nickname", null, MemberRole.valueOf("USER"));
+
 
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
@@ -56,7 +58,9 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     public void processMessage(ChatMessage chatMessage) {
         chatMessageRepository.save(chatMessage);
-        ChatMessageResponse chatMessageResponse = ChatMessageResponse.of(chatMessage);
+        Member member = new Member(2L, "email@eamil", "nickname", null, MemberRole.valueOf("USER"));
+
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.of(chatMessage, member);
 
         kafkaProducer.publish(KafkaConstants.KAFKA_TOPIC, chatMessageResponse);
 
