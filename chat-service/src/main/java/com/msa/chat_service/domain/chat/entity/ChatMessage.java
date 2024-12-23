@@ -36,27 +36,27 @@ public class ChatMessage extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    public static ChatMessage createExitMessage(Member member, ChatRoom chatRoom) {
+    public static ChatMessage createExitMessage(Long memberId, String nickname, ChatRoom chatRoom) {
         return ChatMessage.builder()
-                .memberId(member.getId())
+                .memberId(memberId)
                 .chatRoom(chatRoom)
                 .type(MessageType.EXIT)
-                .content(member.getNickname() + "님이 나가셨습니다.")
+                .content(nickname + "님이 나가셨습니다.")
                 .build();
     }
 
-    public static ChatMessage createEnterMessage(Member member, ChatRoom chatRoom) {
+    public static ChatMessage createEnterMessage(Long memberId, String nickname, ChatRoom chatRoom) {
         return ChatMessage.builder()
-                .memberId(member.getId())
+                .memberId(memberId)
                 .chatRoom(chatRoom)
                 .type(MessageType.ENTER)
-                .content(member.getNickname() + "님이 입장하셨습니다.")
+                .content(nickname + "님이 입장하셨습니다.")
                 .build();
     }
 
-    public static ChatMessage createTalkMessage(Member member, ChatRoom chatRoom, String content) {
+    public static ChatMessage createTalkMessage(Long memberId, ChatRoom chatRoom, String content) {
         return ChatMessage.builder()
-                .memberId(member.getId())
+                .memberId(memberId)
                 .chatRoom(chatRoom)
                 .type(MessageType.TALK)
                 .content(content)
