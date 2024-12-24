@@ -71,12 +71,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
         int memberCount = chatRoomMemberRepository.countByChatRoom(chatRoom);
 
-        // 처음 입장한 경우 환영메시지 생성 후 DB 저장, 메시지 전송
-        if (chatRoom.isFull(memberCount)) {
-            throw new ChatException(ChatErrorCode.FULL_CHAT_ROOM);
-        }
-
         if (!chatRoomMemberRepository.existsByMemberIdAndChatRoom(memberId, chatRoom)) {
+            // 처음 입장한 경우 환영메시지 생성 후 DB 저장, 메시지 전송
+            if (chatRoom.isFull(memberCount)) {
+                throw new ChatException(ChatErrorCode.FULL_CHAT_ROOM);
+            }
+
             chatRoomMemberRepository.save(ChatRoomMember
                     .builder()
                     .memberId(memberId)

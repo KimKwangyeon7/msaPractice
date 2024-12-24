@@ -25,6 +25,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -55,20 +56,23 @@ public class ChatRoomController {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
         String csrfToken = redisTemplate.opsForValue().get("csrfToken::" + memberLoginActive.email());
-        log.info("X-CSRF-TOKEN: {}", csrfToken);
+        //log.info("X-CSRF-TOKEN: {}", csrfToken);
         request.setAttribute("csrfToken", csrfToken);
         List<ChatRoomListResponse> chatRooms = chatRoomService.selectChatRooms(null);
-        for (ChatRoomListResponse chat: chatRooms){
-            System.out.println(chat.chatRoomId() + " " + chat.name());
-        }
+//        for (ChatRoomListResponse chat: chatRooms){
+//            System.out.println(chat.chatRoomId() + " " + chat.name());
+//        }
         request.setAttribute("chatRooms", chatRooms);
+        HttpSession session = request.getSession(true);
+        session.setAttribute("csrfToken", csrfToken);
+        //session.setAttribute("email", email);
         return "index";
     }
 
     @GetMapping("/create")
-    public String createRoom(HttpServletResponse response) {
-//        response.addHeader("Set-Cookie",
-//                        "accessToken=eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzIiwiZW1haWwiOiJzc2FmeUBwcmFjdGljZS5jb20iLCJuYW1lIjoi6rmA64-E7JewIiwibmlja25hbWUiOiLrj4Tsl7AiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNTAwOTEyMSwiZXhwIjoxNzM1MDM0MzIxfQ.tdLkxfL6bzVdE3O49PLIVdQRVuV9S_ZgbrlALiGcPFU; Max-Age=6000; Expires=Tue, 24 Dec 2024 04:38:41 GMT; Path=/; HttpOnly");
+    public String createRoom(HttpSession session, HttpServletRequest request) {
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        request.setAttribute("csrfToken", csrfToken);
         return "createRoom";
     }
 
@@ -76,18 +80,22 @@ public class ChatRoomController {
      * 특정 채팅방 페이지로 이동
      */
     @GetMapping("/room/{chatRoomId}")
-    public String chatRoom(@PathVariable Long chatRoomId, Model model, HttpServletRequest request) {
+    public String chatRoom(@PathVariable Long chatRoomId, Model model, HttpServletRequest request, HttpSession session) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
         // 채팅방 ID를 모델에 추가
         model.addAttribute("chatRoomId", chatRoomId);
+        String chatRoomTitle = chatRoomRepository.findById(chatRoomId).orElse(null).getName();
         List<ChatMessageResponse> chats = chatMessageService.selectChatMessages(chatRoomId, null);
-        for (ChatMessageResponse chat: chats){
-            System.out.println(chat.getContent() + " " + chat.getSenderNickname());
-        }
+//        for (ChatMessageResponse chat: chats){
+//            System.out.println(chat.getContent() + " " + chat.getSenderNickname());
+//        }
+        request.setAttribute("chatRoomName", chatRoomTitle);
         request.setAttribute("chatMessages", chats);
         request.setAttribute("senderId", memberLoginActive.id());
         request.setAttribute("senderNickname", memberLoginActive.nickname());
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        request.setAttribute("csrfToken", csrfToken);
         return "chat-room"; // chatRoom.jsp로 이동
     }
 
@@ -139,12 +147,13 @@ public class ChatRoomController {
 //    )
     @PostMapping("/create")
     //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<?> createChatRoom(@Validated @RequestBody CreateChatRoomRequest createChatRoomRequest, HttpServletRequest request) {
+    public ResponseEntity<?> createChatRoom(@Validated @RequestBody CreateChatRoomRequest createChatRoomRequest, HttpServletRequest request, HttpSession session) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
         if (!hasAnyRole(memberLoginActive, "ADMIN") && !hasAnyRole(memberLoginActive, "USER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Message.success());
         }
+
         Long chatRoomId = chatRoomService.createChatRoom(memberLoginActive.id(), createChatRoomRequest);
         CreateChatRoomResponse response = new CreateChatRoomResponse(chatRoomId);
 

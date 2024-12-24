@@ -1,9 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    String csrfToken = request.getAttribute("csrfToken").toString();
+%>
 <!DOCTYPE html>
 <html>
 <head>
     <title>채팅방 생성</title>
     <script>
+        const csrfToken = "<%= csrfToken %>";
         function createChatRoom() {
             const formData = {
                 category: document.getElementById("category").value,
@@ -16,6 +20,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'include', // 쿠키 포함
                 body: JSON.stringify(formData),
@@ -54,7 +59,15 @@
 <h1>채팅방 생성</h1>
 <form onsubmit="event.preventDefault(); createChatRoom();">
     <label for="category">카테고리:</label>
-    <input type="text" id="category" name="category" required><br><br>
+    <select id="category" name="category" required>
+        <option value="">카테고리를 선택해주세요</option>
+        <option value="ETC">ETC</option>
+        <option value="INTERIOR">INTERIOR</option>
+        <option value="COMMERCIAL_AREA">COMMERCIAL_AREA</option>
+        <option value="PARTNERSHIP">PARTNERSHIP</option>
+        <option value="START_UP">START_UP</option>
+    </select>
+    <br><br>
 
     <label for="name">채팅방 이름:</label>
     <input type="text" id="name" name="name" required><br><br>
