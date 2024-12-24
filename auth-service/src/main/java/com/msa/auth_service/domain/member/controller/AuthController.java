@@ -296,7 +296,10 @@ public class AuthController {
 
     @PostMapping("/member/community")
     public ResponseEntity<List<MemberInfoResponse>> getMembersByIds(@RequestBody List<Long> writerIds) {
-        //System.out.println(writerIds.size());
+        System.out.println(writerIds.size());
+        for (Long id : writerIds) {
+            System.out.println("memberId: "+ id);
+        }
         if (writerIds == null || writerIds.isEmpty()) {
             return ResponseEntity.badRequest().build(); // 요청된 ID가 없으면 400 Bad Request 반환
         }
@@ -306,7 +309,7 @@ public class AuthController {
 
     @GetMapping("/member/community/{writerId}")
     public ResponseEntity<MemberInfoResponse> getMemberInfoById(@PathVariable Long writerId) {
-        //System.out.println(writerId.size());
+        //System.out.println("memberId: "+ writerId);
         if (writerId == null) {
             return ResponseEntity.badRequest().build(); // 요청된 ID가 없으면 400 Bad Request 반환
         }

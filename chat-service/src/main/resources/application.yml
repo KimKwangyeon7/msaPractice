@@ -87,6 +87,8 @@ app:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
     org.hibernate:
       type.descriptor.sql: trace
       org.hibernate.SQLQuery: debug

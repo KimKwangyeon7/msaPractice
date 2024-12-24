@@ -5,8 +5,13 @@ import com.msa.chat_service.domain.chat.dto.JwtTokenPropsInfo;
 import com.msa.chat_service.domain.chat.dto.request.CreateChatRoomRequest;
 import com.msa.chat_service.domain.chat.dto.request.MyChatRoomListRequest;
 import com.msa.chat_service.domain.chat.dto.response.*;
+import com.msa.chat_service.domain.chat.entity.ChatMessage;
+import com.msa.chat_service.domain.chat.entity.ChatRoom;
+import com.msa.chat_service.domain.chat.exception.ChatErrorCode;
+import com.msa.chat_service.domain.chat.exception.ChatException;
 import com.msa.chat_service.domain.chat.exception.JwtTokenErrorCode;
 import com.msa.chat_service.domain.chat.exception.JwtTokenException;
+import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.chat.service.ChatMessageService;
 import com.msa.chat_service.domain.chat.service.ChatRoomService;
 import com.msa.chat_service.domain.member.dto.MemberLoginActive;
@@ -37,6 +42,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final JwtTokenPropsInfo jwtTokenPropsInfo;
+    private final ChatRoomRepository chatRoomRepository;
     /**
      * 채팅 서비스 메인 페이지로 이동
      */
@@ -52,8 +58,8 @@ public class ChatRoomController {
 
     @GetMapping("/create")
     public String createRoom(HttpServletResponse response) {
-        response.addHeader("Set-Cookie", "\t\n" +
-                "accessToken=eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIyIiwiZW1haWwiOiJrd2FuZzk3MDVAcHJhY3RpY2UuY29tIiwibmFtZSI6Iuq5gOq0keyXsCIsIm5pY2tuYW1lIjoi7IOI66Gc7Jq064uJ64S0Iiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3MzQ5NTI0NjYsImV4cCI6MTczNDk3NzY2Nn0.UggiifbWYdbLJ4-SXOxr4s6v-iZgYNwLOct5FIP0CVI; Max-Age=6000; Expires=Mon, 23 Dec 2024 12:54:26 GMT; Path=/; HttpOnly");
+        response.addHeader("Set-Cookie",
+                        "accessToken=eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzIiwiZW1haWwiOiJzc2FmeUBwcmFjdGljZS5jb20iLCJuYW1lIjoi6rmA64-E7JewIiwibmlja25hbWUiOiLrj4Tsl7AiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNTAwOTEyMSwiZXhwIjoxNzM1MDM0MzIxfQ.tdLkxfL6bzVdE3O49PLIVdQRVuV9S_ZgbrlALiGcPFU; Max-Age=6000; Expires=Tue, 24 Dec 2024 04:38:41 GMT; Path=/; HttpOnly");
         return "createRoom";
     }
 
@@ -62,6 +68,8 @@ public class ChatRoomController {
      */
     @GetMapping("/room/{chatRoomId}")
     public String chatRoom(@PathVariable Long chatRoomId, Model model, HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
         // 채팅방 ID를 모델에 추가
         model.addAttribute("chatRoomId", chatRoomId);
         List<ChatMessageResponse> chats = chatMessageService.selectChatMessages(chatRoomId, null);
@@ -69,6 +77,8 @@ public class ChatRoomController {
             System.out.println(chat.getContent() + " " + chat.getSenderNickname());
         }
         request.setAttribute("chatMessages", chats);
+        request.setAttribute("senderId", memberLoginActive.id());
+        request.setAttribute("senderNickname", memberLoginActive.nickname());
         return "chat-room"; // chatRoom.jsp로 이동
     }
 
@@ -128,8 +138,12 @@ public class ChatRoomController {
         }
         Long chatRoomId = chatRoomService.createChatRoom(memberLoginActive.id(), createChatRoomRequest);
         CreateChatRoomResponse response = new CreateChatRoomResponse(chatRoomId);
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
+        ChatMessage enterMessage = ChatMessage.createEnterMessage(memberLoginActive.id(), memberLoginActive.nickname(), chatRoom);
+        chatMessageService.processMessage(enterMessage, memberLoginActive.id());
         return ResponseEntity.ok().body(Message.success(response));
-        //return null;
     }
 
 //    @Operation(

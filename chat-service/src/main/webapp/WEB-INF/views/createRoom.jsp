@@ -21,17 +21,30 @@
                 body: JSON.stringify(formData),
             })
                 .then(response => {
-                    if (response.ok) {
+                    // 응답이 JSON인지 확인
+                    if (!response.ok) {
+                        throw new Error("HTTP error, status = " + response.status);
+                    }
+                    return response.json(); // JSON으로 파싱
+                })
+                .then(data => {
+                    console.log("전체 응답 데이터:", data);
+
+                    // 응답 데이터에서 chatRoomId 추출
+                    const chatRoomId = data?.dataBody?.chatRoomId; // 응답 구조에 따라 수정 필요
+                    console.log("채팅방 ID:", chatRoomId);
+
+                    if (chatRoomId) {
                         alert("채팅방이 생성되었습니다.");
-                        window.location.href = '/chat/index'; // 채팅방 목록 페이지로 이동
+                        // 생성된 채팅방으로 이동
+                        window.location.href = "/chat/room/" + chatRoomId;
                     } else {
-                        return response.json().then(error => {
-                            alert("채팅방 생성 실패: " + error.message);
-                        });
+                        throw new Error("채팅방 ID를 가져올 수 없습니다.");
                     }
                 })
                 .catch(error => {
-                    console.error("Error:", error);
+                    console.error("에러 발생:", error);
+                    alert("채팅방 생성에 실패했습니다. 에러: " + error.message);
                 });
         }
     </script>
