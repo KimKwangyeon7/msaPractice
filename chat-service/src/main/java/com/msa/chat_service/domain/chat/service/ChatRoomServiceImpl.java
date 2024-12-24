@@ -16,6 +16,7 @@ import com.msa.chat_service.domain.chat.repository.ChatRoomMemberRepository;
 import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.member.entity.Member;
 import com.msa.chat_service.domain.member.entity.enums.Category;
+import com.msa.chat_service.domain.member.entity.enums.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,6 @@ import java.util.List;
 public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
-    //private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageService chatMessageService;
 
@@ -52,12 +52,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
         chatRoomRepository.save(chatRoom);
 
-//        Member sender = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member sender = null;
-
         chatRoomMemberRepository.save(ChatRoomMember.builder()
-                .memberId(sender.getId())
+                .memberId(memberId)
                 .chatRoom(chatRoom)
                 .build());
 
@@ -70,11 +66,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public EnterChatRoomResponse enterChatRoom(Long memberId, Long chatRoomId) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member member = null;
-
+    public EnterChatRoomResponse enterChatRoom(Long memberId, String nickname,Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
         int memberCount = chatRoomMemberRepository.countByChatRoom(chatRoom);
@@ -84,14 +76,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ChatErrorCode.FULL_CHAT_ROOM);
         }
 
-        if (!chatRoomMemberRepository.existsByMemberAndChatRoom(member, chatRoom)) {
+        if (!chatRoomMemberRepository.existsByMemberIdAndChatRoom(memberId, chatRoom)) {
             chatRoomMemberRepository.save(ChatRoomMember
                     .builder()
-                    .memberId(member.getId())
+                    .memberId(memberId)
                     .chatRoom(chatRoom)
                     .build());
-            ChatMessage enterMessage = ChatMessage.createEnterMessage(member, chatRoom);
-            chatMessageService.processMessage(enterMessage);
+            ChatMessage enterMessage = ChatMessage.createEnterMessage(memberId, nickname, chatRoom);
+            chatMessageService.processMessage(enterMessage, memberId);
         }
 
         return new EnterChatRoomResponse(chatRoomId);
@@ -104,26 +96,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void exitChatRoom(Long memberId, Long chatRoomId) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member member = null;
-
+    public void exitChatRoom(Long memberId, String nickname, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
 
         // 채팅방 탈퇴 메시지 전송
-        ChatMessage exitMessage = ChatMessage.createExitMessage(member, chatRoom);
+        ChatMessage exitMessage = ChatMessage.createExitMessage(memberId, nickname, chatRoom);
 
-        chatMessageService.processMessage(exitMessage);
+        chatMessageService.processMessage(exitMessage, memberId);
 
         // 구성원 제거
-        chatRoomMemberRepository.deleteByMemberAndChatRoom(member, chatRoom);
+        chatRoomMemberRepository.deleteByMemberIdAndChatRoom(memberId, chatRoom);
 
         if (!chatRoomMemberRepository.existsByChatRoom(chatRoom)) {
             // 채팅 메시지 삭제
             chatMessageRepository.deleteByChatRoom(chatRoom);
-
             // 채팅방 삭제
             chatRoomRepository.delete(chatRoom);
         }

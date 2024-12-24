@@ -8,7 +8,9 @@ import com.msa.chat_service.domain.chat.exception.ChatErrorCode;
 import com.msa.chat_service.domain.chat.exception.ChatException;
 import com.msa.chat_service.domain.chat.repository.ChatMessageRepository;
 import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
+import com.msa.chat_service.domain.member.dto.MemberInfoResponse;
 import com.msa.chat_service.domain.member.entity.Member;
+import com.msa.chat_service.domain.member.entity.enums.MemberRole;
 import com.msa.chat_service.domain.member.exception.MemberErrorCode;
 import com.msa.chat_service.domain.member.exception.MemberException;
 import com.msa.chat_service.global.component.kafka.KafkaConstants;
@@ -16,6 +18,7 @@ import com.msa.chat_service.global.component.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -25,7 +28,6 @@ import java.util.List;
 public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    //private final MemberRepository memberRepository;
     private final KafkaProducer kafkaProducer;
     //private final FirebaseService firebaseService;
 
@@ -41,22 +43,22 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     // 단순히 메시지 전송 >> 단, chatRoomMember인지 확인
     @Override
     public void send(String topic, ChatMessageRequest request) {
-//        Member member = memberRepository.findById(request.getSenderId())
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-        Member member = null;
-
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new ChatException(ChatErrorCode.NOT_EXIST_CHAT_ROOM));
 
         // repo에 메시지 저장
-        ChatMessage talkMessage = ChatMessage.createTalkMessage(member, chatRoom, request.getContent());
+        ChatMessage talkMessage = ChatMessage.createTalkMessage(request.getSenderId(), chatRoom, request.getContent());
 
-        processMessage(talkMessage);
+        processMessage(talkMessage, request.getSenderId());
     }
 
-    public void processMessage(ChatMessage chatMessage) {
+    public void processMessage(ChatMessage chatMessage, Long memberId) {
         chatMessageRepository.save(chatMessage);
-        ChatMessageResponse chatMessageResponse = ChatMessageResponse.of(chatMessage);
+        MemberInfoResponse memberInfoResponse = getMemberInfo(memberId);
+        if (memberInfoResponse == null){
+            return;
+        }
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.of(chatMessage, memberInfoResponse);
 
         kafkaProducer.publish(KafkaConstants.KAFKA_TOPIC, chatMessageResponse);
 
@@ -67,5 +69,22 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 //                        .body(chatMessage.getContent())
 //                        .topicName("chat.room." + chatMessage.getChatRoom().getId())
 //                        .build());
+    }
+
+    private MemberInfoResponse getMemberInfo(Long memberId) {
+        WebClient webClient = WebClient.create("http://localhost:9443");
+
+        try {
+            return webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/auth//member/community/{writerId}")
+                            .build(memberId))
+                    .retrieve()
+                    .bodyToMono(MemberInfoResponse.class)
+                    .block();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // 실패 시 null 반환
+        }
     }
 }

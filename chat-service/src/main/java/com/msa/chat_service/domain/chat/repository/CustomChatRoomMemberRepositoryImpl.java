@@ -1,6 +1,7 @@
 package com.msa.chat_service.domain.chat.repository;
 
 import com.msa.chat_service.domain.chat.dto.response.ChatRoomResponse;
+import com.msa.chat_service.domain.member.entity.enums.Category;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.msa.chat_service.domain.chat.entity.QChatRoomMember.chatRoomMember;
+
 @Repository
 @RequiredArgsConstructor
 public class CustomChatRoomMemberRepositoryImpl implements CustomChatRoomMemberRepository {
@@ -17,29 +20,28 @@ public class CustomChatRoomMemberRepositoryImpl implements CustomChatRoomMemberR
 
     @Override
     public List<ChatRoomResponse> selectPopularChatRoom(String category) {
-//        return queryFactory
-//                .select(Projections.constructor(ChatRoomResponse.class,
-//                        chatRoomMember.chatRoom.id,
-//                        chatRoomMember.chatRoom.category,
-//                        chatRoomMember.chatRoom.name,
-//                        chatRoomMember.chatRoom.introduction,
-//                        chatRoomMember.count().intValue(),
-//                        chatRoomMember.chatRoom.limit
-//                ))
-//                .from(chatRoomMember)
-//                .where(categoryEquals(category))
-//                .groupBy(chatRoomMember.chatRoom)
-//                .orderBy(chatRoomMember.count().desc())
-//                .limit(2)
-//                .fetch();
-        return null;
+        return queryFactory
+                .select(Projections.constructor(ChatRoomResponse.class,
+                        chatRoomMember.chatRoom.id,
+                        chatRoomMember.chatRoom.category,
+                        chatRoomMember.chatRoom.name,
+                        chatRoomMember.chatRoom.introduction,
+                        chatRoomMember.count().intValue(),
+                        chatRoomMember.chatRoom.limit
+                ))
+                .from(chatRoomMember)
+                .where(categoryEquals(category))
+                .groupBy(chatRoomMember.chatRoom)
+                .orderBy(chatRoomMember.count().desc())
+                .limit(2)
+                .fetch();
     }
 
-//    private BooleanBuilder categoryEquals(final String category) {
-//        BooleanBuilder builder = new BooleanBuilder();
-//        if (!category.isBlank()) {
-//            builder.and(chatRoomMember.chatRoom.category.eq(Category.valueOf(category)));
-//        }
-//        return builder;
-//    }
+    private BooleanBuilder categoryEquals(final String category) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (!category.isBlank()) {
+            builder.and(chatRoomMember.chatRoom.category.eq(Category.valueOf(category)));
+        }
+        return builder;
+    }
 }

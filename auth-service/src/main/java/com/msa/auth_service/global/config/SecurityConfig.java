@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // 모든 요청에 대해 접근을 허용합니다.
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(request -> "GET".equalsIgnoreCase(request.getMethod())).permitAll() // GET 요청 인증 생략
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/auth/login").permitAll()
@@ -116,6 +117,11 @@ public class SecurityConfig {
             protected boolean shouldNotFilter(HttpServletRequest request) {
                 String requestURI = request.getRequestURI();
                 String method = request.getMethod();
+                // GET 요청인 경우 필터링 생략
+                if ("GET".equalsIgnoreCase(method)) {
+                    return true;
+                }
+                // 특정 경로는 제외
                 boolean shouldExclude = excludedMatcher.matches(request);
                 System.out.println("Request URI: " + requestURI + ", Method: " + method + ", Should Exclude: " + shouldExclude);
                 return shouldExclude;
@@ -173,6 +179,7 @@ public class SecurityConfig {
         // 모든 출처에서 오는 요청을 허용합니다. 구체적인 출처를 지정하는 것이 권장됩니다.
         config.addAllowedOrigin("http://localhost:8443");
         config.addAllowedOrigin("http://localhost:9001");
+        config.addAllowedOrigin("http://localhost:9003");
         // 모든 요청 헤더를 허용합니다. 클라이언트가 요청에 다양한 종류의 헤더를 포함시킬 수 있습니다.
         config.addAllowedHeader("*");
         // 모든 HTTP 메서드를 허용합니다. 이를 통해 RESTful API 지원이 강화됩니다.
