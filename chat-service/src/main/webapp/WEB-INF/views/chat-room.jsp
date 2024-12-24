@@ -4,8 +4,10 @@
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%
     String chatRoomId = request.getAttribute("chatRoomId").toString();
+    String chatRoomName = request.getAttribute("chatRoomName").toString();
     String senderId = request.getAttribute("senderId").toString();
     String senderNickname = request.getAttribute("senderNickname").toString();
+    String csrfToken = request.getAttribute("csrfToken").toString();
     List<ChatMessageResponse> chatMessages = (List<ChatMessageResponse>) request.getAttribute("chatMessages");
     // 채팅 내역을 오래된 순으로 정렬
     if (chatMessages != null) {
@@ -17,12 +19,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>채팅방 <% out.print(chatRoomId); %></title>
+    <title><% out.print(chatRoomName); %></title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script>
         let stompClient = null;
-
+        const csrfToken = "<%= csrfToken %>";
         // WebSocket 연결
         function connect() {
             const socket = new WebSocket('ws://localhost:9003/ws');
@@ -94,6 +96,7 @@
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     credentials: "include",
                 })
