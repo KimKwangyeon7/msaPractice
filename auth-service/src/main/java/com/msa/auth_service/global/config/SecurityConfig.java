@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 // 모든 요청에 대해 접근을 허용합니다.
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(request -> "GET".equalsIgnoreCase(request.getMethod())).permitAll() // GET 요청 인증 생략
                         .requestMatchers("/WEB-INF/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/auth/login").permitAll()
@@ -116,6 +117,11 @@ public class SecurityConfig {
             protected boolean shouldNotFilter(HttpServletRequest request) {
                 String requestURI = request.getRequestURI();
                 String method = request.getMethod();
+                // GET 요청인 경우 필터링 생략
+                if ("GET".equalsIgnoreCase(method)) {
+                    return true;
+                }
+                // 특정 경로는 제외
                 boolean shouldExclude = excludedMatcher.matches(request);
                 System.out.println("Request URI: " + requestURI + ", Method: " + method + ", Should Exclude: " + shouldExclude);
                 return shouldExclude;

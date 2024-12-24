@@ -32,7 +32,7 @@
                 console.log('Connected: ' + frame);
 
                 // 채팅방 메시지 구독
-                stompClient.subscribe(`/topic/publish/rooms/${chatRoomId}`, function (message) {
+                stompClient.subscribe(`/topic/public/rooms/${chatRoomId}`, function (message) {
                     const chatMessage = JSON.parse(message.body);
                     showMessage(chatMessage);
                 });
@@ -64,7 +64,7 @@
                 createdAt: createdAt
             };
             // 채팅 내역에 즉시 추가
-            showMessage(chatMessage);
+            //showMessage(chatMessage);
             stompClient.send(`/app/chat/message/${chatRoomId}`, {}, JSON.stringify(chatMessage));
             // 입력 필드 초기화
             document.getElementById("message").value = "";
@@ -83,7 +83,7 @@
             chatBox.appendChild(messageElement);
 
             // 스크롤 자동 아래로 이동
-            chatBox.scrollTop = chatBox.scrollHeight;
+            //chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         // 채팅방 나가기
