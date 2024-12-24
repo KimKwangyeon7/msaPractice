@@ -71,6 +71,13 @@
                     }
                 });
             });
+
+            // 채팅 서비스로 이동
+            $('#chat-service').click(function () {
+                const url = "/chat/index";
+                // 페이지 이동
+                window.location.href = url;
+            });
         });
     </script>
 </head>
@@ -82,5 +89,6 @@
 <br><br>
 <button onclick="window.location.href='/auth/member/password/change'">비밀번호 변경</button>
 <button onclick="window.location.href='/auth/member/update'">프로필 변경</button>
+<button id="chat-service">채팅 서비스</button>
 </body>
 </html>

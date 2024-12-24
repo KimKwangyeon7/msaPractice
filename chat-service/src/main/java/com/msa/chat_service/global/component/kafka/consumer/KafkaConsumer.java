@@ -17,7 +17,7 @@ public class KafkaConsumer {
     private final SimpMessagingTemplate simpMessagingTemplate;
 //    private final DataRepository dataRepository;
 
-    @KafkaListener(topics = KafkaConstants.KAFKA_TOPIC, groupId = "chat-service")
+    @KafkaListener(topics = KafkaConstants.KAFKA_TOPIC, groupId = "chat-service-group")
     public void handleChatMessage(ChatMessageResponse chatMessage) {
         log.info("채팅 메시지 이벤트 수신 : {} {} {} ", chatMessage.getContent(), chatMessage.getChatRoomId(), chatMessage.getSenderId());
         simpMessagingTemplate.convertAndSend("/topic/public/rooms/" + chatMessage.getChatRoomId(), chatMessage);

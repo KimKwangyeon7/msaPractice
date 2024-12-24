@@ -26,6 +26,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/chat")
 public class ChatRoomController {
@@ -43,11 +46,17 @@ public class ChatRoomController {
     private final ChatMessageService chatMessageService;
     private final JwtTokenPropsInfo jwtTokenPropsInfo;
     private final ChatRoomRepository chatRoomRepository;
+    private final RedisTemplate<String, String> redisTemplate;
     /**
      * 채팅 서비스 메인 페이지로 이동
      */
     @GetMapping("/index")
     public String chatIndex(HttpServletRequest request) {
+        String accessToken = getAccessToken(request);
+        MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
+        String csrfToken = redisTemplate.opsForValue().get("csrfToken::" + memberLoginActive.email());
+        log.info("X-CSRF-TOKEN: {}", csrfToken);
+        request.setAttribute("csrfToken", csrfToken);
         List<ChatRoomListResponse> chatRooms = chatRoomService.selectChatRooms(null);
         for (ChatRoomListResponse chat: chatRooms){
             System.out.println(chat.chatRoomId() + " " + chat.name());
@@ -58,8 +67,8 @@ public class ChatRoomController {
 
     @GetMapping("/create")
     public String createRoom(HttpServletResponse response) {
-        response.addHeader("Set-Cookie",
-                        "accessToken=eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzIiwiZW1haWwiOiJzc2FmeUBwcmFjdGljZS5jb20iLCJuYW1lIjoi6rmA64-E7JewIiwibmlja25hbWUiOiLrj4Tsl7AiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNTAwOTEyMSwiZXhwIjoxNzM1MDM0MzIxfQ.tdLkxfL6bzVdE3O49PLIVdQRVuV9S_ZgbrlALiGcPFU; Max-Age=6000; Expires=Tue, 24 Dec 2024 04:38:41 GMT; Path=/; HttpOnly");
+//        response.addHeader("Set-Cookie",
+//                        "accessToken=eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzIiwiZW1haWwiOiJzc2FmeUBwcmFjdGljZS5jb20iLCJuYW1lIjoi6rmA64-E7JewIiwibmlja25hbWUiOiLrj4Tsl7AiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNTAwOTEyMSwiZXhwIjoxNzM1MDM0MzIxfQ.tdLkxfL6bzVdE3O49PLIVdQRVuV9S_ZgbrlALiGcPFU; Max-Age=6000; Expires=Tue, 24 Dec 2024 04:38:41 GMT; Path=/; HttpOnly");
         return "createRoom";
     }
 
