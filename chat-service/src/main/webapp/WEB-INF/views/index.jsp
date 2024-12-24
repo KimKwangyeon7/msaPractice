@@ -4,12 +4,14 @@
 <%
     // 채팅방 목록 가져오기
     List<ChatRoomListResponse> chatRooms = (List<ChatRoomListResponse>) request.getAttribute("chatRooms");
+    String csrfToken = request.getAttribute("csrfToken").toString();
 %>
 <!DOCTYPE html>
 <html>
 <head>
     <title>채팅 서비스</title>
     <script>
+        const csrfToken = "<%= csrfToken %>";
         function enterChatRoom(button) {
             // data-chat-room-id 속성에서 채팅방 ID를 읽어옵니다.
             const chatRoomId = button.getAttribute("data-chat-room-id");
@@ -23,6 +25,7 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'include', // 쿠키 포함
             })
@@ -61,7 +64,7 @@
     <% } %>
 </ul>
 
-<button onclick="location.href='/chat/create'">채팅방 생성</button>
+<button onclick="window.location.href='/chat/create'">채팅방 생성</button>
 
 </body>
 </html>
