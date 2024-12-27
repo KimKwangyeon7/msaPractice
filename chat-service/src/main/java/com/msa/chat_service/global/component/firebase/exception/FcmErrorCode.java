@@ -10,6 +10,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @AllArgsConstructor
 public enum FcmErrorCode {
     SUBSCRIBE_FAIL("토픽 구독에 실패했습니다.", BAD_REQUEST),
+    UNSUBSCRIBE_FAIL("토픽 구독 취소에 실패했습니다.", BAD_REQUEST),
     INIT_FAIL("FCM 서버 세팅 중 에러가 발생했습니다.", BAD_REQUEST),
     NO_EXIST_USER("유저가 존재하지 않습니다.", BAD_REQUEST),
     CAN_NOT_SEND_NOTIFICATION("푸시 알림 전송에 실패했습니다.", BAD_REQUEST),

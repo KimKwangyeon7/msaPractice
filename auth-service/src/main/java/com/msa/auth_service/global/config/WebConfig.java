@@ -6,6 +6,7 @@ import com.msa.auth_service.global.component.oauth.vendor.enums.OAuthDomainConve
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -25,6 +26,15 @@ public class WebConfig implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new OAuthDomainConverter()); // OAuthDomain 컨버터 등록
     }
+
+    /**
+     * 정적 리소스 경로를 처리하도록 설정합니다.
+     */
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/static/**")
+//                .addResourceLocations("classpath:/static/"); // 정적 리소스 경로 매핑
+//    }
 
     @Bean
     public InternalResourceViewResolver viewResolver() {

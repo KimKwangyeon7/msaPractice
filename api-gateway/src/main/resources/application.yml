@@ -45,6 +45,12 @@ spring:
           uri: http://localhost:9443
           predicates:
             - Path=/auth/**
+        - id: firebase-messaging
+          uri: http://localhost:9443  # 인증 서버 URL
+          predicates:
+            - Path=/firebase-messaging-sw.js
+          filters:
+            - StripPrefix=0  # 경로 유지
         - id: member-service
           uri: http://localhost:9001
           predicates:

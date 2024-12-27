@@ -7,7 +7,9 @@ import com.msa.chat_service.domain.member.entity.Member;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, Long>, CustomChatRoomMemberRepository {
@@ -22,4 +24,7 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
     boolean existsByMemberIdAndChatRoom(Long member, ChatRoom chatRoom);
 
     int countByChatRoom(ChatRoom chatRoom);
+
+    @Query("SELECT c.memberId FROM ChatRoomMember c WHERE c.chatRoom.id = :chatRoomId")
+    List<Long> findAllByChatRoomId(Long chatRoomId);
 }
