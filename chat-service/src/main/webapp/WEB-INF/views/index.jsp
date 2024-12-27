@@ -10,8 +10,44 @@
 <html>
 <head>
     <title>채팅 서비스</title>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-messaging-compat.js"></script>
     <script>
+        // CSRF 토큰을 전역 변수로 정의
         const csrfToken = "<%= csrfToken %>";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("CSRF Token:", csrfToken);
+            // Firebase 초기화 설정
+            const firebaseConfig = {
+                apiKey: "AIzaSyBD3MGw9uE9Xpw3wvYKA4Ih_wqlmolAWYo",
+                authDomain: "msapractice-cecd2.firebaseapp.com",
+                projectId: "msapractice-cecd2",
+                storageBucket: "msapractice-cecd2.firebasestorage.app",
+                messagingSenderId: "335419323377",
+                appId: "1:335419323377:web:448f785add14f0dcf88a50",
+                measurementId: "G-0MXDBWN85V",
+            };
+
+            // Firebase 앱 초기화
+            const app = firebase.initializeApp(firebaseConfig);
+            const messaging = firebase.messaging();
+
+            // 푸시 알림 수신 처리
+            messaging.onMessage((payload) => {
+                console.log("푸시 알림 수신:", payload);
+                const { title, body } = payload.notification;
+
+                // 알림 표시
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                    });
+                } else {
+                    alert(`[알림] ${title}: ${body}`);
+                }
+            });
+        });
         function enterChatRoom(button) {
             // data-chat-room-id 속성에서 채팅방 ID를 읽어옵니다.
             const chatRoomId = button.getAttribute("data-chat-room-id");

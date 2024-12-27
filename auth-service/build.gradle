@@ -62,7 +62,8 @@ dependencies {
 	runtimeOnly "org.apache.tomcat.embed:tomcat-embed-jasper"
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
 
-
+	// Firebase
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 }
 
 tasks.named('test') {

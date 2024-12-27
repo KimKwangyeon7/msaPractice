@@ -5,17 +5,69 @@
     <title>Main Page</title>
     <meta name="csrf-token" content="${csrfToken}">
     <script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-messaging-compat.js"></script>
     <script>
         $(document).ready(function () {
             // CSRF 토큰 및 이메일 값 가져오기
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            // Firebase 초기화 설정
+            const firebaseConfig = {
+                apiKey: "AIzaSyBD3MGw9uE9Xpw3wvYKA4Ih_wqlmolAWYo",
+                authDomain: "msapractice-cecd2.firebaseapp.com",
+                projectId: "msapractice-cecd2",
+                storageBucket: "msapractice-cecd2.firebasestorage.app",
+                messagingSenderId: "335419323377",
+                appId: "1:335419323377:web:448f785add14f0dcf88a50",
+                measurementId: "G-0MXDBWN85V",
+            };
+
+            // Firebase 앱 초기화
+            const app = firebase.initializeApp(firebaseConfig);
+            const messaging = firebase.messaging();
+
+            // 푸시 알림 수신 처리
+            messaging.onMessage((payload) => {
+                console.log("푸시 알림 수신:", payload);
+                const { title, body } = payload.notification;
+
+                // 알림 표시
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                    });
+                } else {
+                    alert(`[알림] ${title}: ${body}`);
+                }
+            });
 
             // 로그아웃 버튼 클릭 시 요청
             $('#logout').click(function () {
-                // if (!email) {
-                //     alert('이메일 정보가 없습니다!');
-                //     return;
-                // }
+                // 서버에 디바이스 토큰 삭제 요청
+                deleteDeviceToken(csrfToken);
+                // 로그아웃 요청 실행
+                logout(csrfToken);
+            });
+
+            // 디바이스 토큰 삭제 함수
+            function deleteDeviceToken(csrfToken) {
+                $.ajax({
+                    url: "http://localhost:8443/chat/firebase/message",
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+                    success: function () {
+                        console.log("디바이스 토큰 삭제 성공");
+                    },
+                    error: function (xhr) {
+                        console.error("디바이스 토큰 삭제 실패:", xhr);
+                    }
+                });
+            }
+            // 로그아웃 요청 함수
+            function logout(csrfToken) {
                 $.ajax({
                     url: `/member/logout`,
                     method: 'POST',
@@ -42,7 +94,7 @@
                         alert(`Logout failed: ${xhr.status} ${xhr.statusText}`);
                     }
                 });
-            });
+            }
 
             // 회원탈퇴 버튼 클릭 시 요청
             $('#deleteAccount').click(function () {

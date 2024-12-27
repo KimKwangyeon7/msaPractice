@@ -70,6 +70,11 @@ logging:
       type.descriptor.sql: trace
       org.hibernate.SQLQuery: debug
 
+# firebase setting
+app:
+  firebase-configuration-file: classpath:serviceAccountKey.json
+  #  firebase-bucket: ENC(kEjE5eNrPFCEldmd4VOt0mXnXI2qkPVNJIhOBdW8K60=)
+  firebase-project-id: msapractice-cecd2
 
 oauth:
   kakao:

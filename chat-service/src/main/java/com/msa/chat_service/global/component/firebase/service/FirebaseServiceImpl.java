@@ -72,6 +72,21 @@ public class FirebaseServiceImpl implements FirebaseService {
         }
     }
 
+    @Override
+    public void unsubscribeByTopic(FcmSubscribeRequest fcmSubscribeRequest) {
+        try {
+            // Firebase Admin SDK에서 구독 취소 수행
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(
+                    Collections.singletonList(fcmSubscribeRequest.token()),
+                    fcmSubscribeRequest.topic()
+            );
+        } catch (FirebaseMessagingException e) {
+            // 예외 발생 시 사용자 정의 예외로 변환
+            throw new FcmException(FcmErrorCode.UNSUBSCRIBE_FAIL);
+        }
+    }
+
+
     // 지정된 topic에 fcm를 보냄
     @Override
     public void sendMessageByTopic(FcmTopicRequest fcmTopicRequest) {
@@ -93,32 +108,45 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public void sendMessageByToken(FcmTokenRequest fcmTokenRequest) {
         //Member member = memberRepository.findById(fcmTokenRequest.memberId()).orElseThrow(() -> new FcmException(FcmErrorCode.NO_EXIST_USER));
-        Long member = 1L;
-        List<String> tokenList = deviceTokenRepository.findTokenAllByMember(member).orElseThrow(() -> new FcmException(FcmErrorCode.NO_EXIST_TOKEN));
-        try {
-            FirebaseMessaging.getInstance().sendMulticast(MulticastMessage.builder()
-                    .setNotification(Notification.builder()
+//        Long member = 1L;
+//        List<String> tokenList = deviceTokenRepository.findTokenAllByMember(member).orElseThrow(() -> new FcmException(FcmErrorCode.NO_EXIST_TOKEN));
+//        try {
+//            FirebaseMessaging.getInstance().sendMulticast(MulticastMessage.builder()
+//                    .setNotification(Notification.builder()
+//                            .setTitle(fcmTokenRequest.title())
+//                            .setBody(fcmTokenRequest.body())
+//                            .build())
+//                    .addAllTokens(tokenList)
+//                    .build());
+//        } catch (FirebaseMessagingException e) {
+//            throw new FcmException(FcmErrorCode.CAN_NOT_SEND_NOTIFICATION);
+//        }
+        String token = deviceTokenRepository.findTokenAllByMember(fcmTokenRequest.memberId()).orElse(null).get(0);
+        Message message = Message.builder()
+                .setToken(token)
+                .setNotification(Notification.builder()
                             .setTitle(fcmTokenRequest.title())
                             .setBody(fcmTokenRequest.body())
                             .build())
-                    .addAllTokens(tokenList)
-                    .build());
+                .build();
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            System.out.println("메시지 전송 성공: " + response);
         } catch (FirebaseMessagingException e) {
-            throw new FcmException(FcmErrorCode.CAN_NOT_SEND_NOTIFICATION);
+            System.err.println("메시지 전송 실패: " + e.getMessage());
         }
     }
 
     @Transactional
     @Override
     public void createDeviceToken(Long memberId, String deviceToken) {
-        //Member member = memberRepository.findById(memberId).orElseThrow(() -> new FcmException(FcmErrorCode.NO_EXIST_USER));
-        Long member = 1L;
-        deviceTokenRepository.save(DeviceToken.builder().token(deviceToken).memberId(member).build());
+        deviceTokenRepository.save(DeviceToken.builder().token(deviceToken).memberId(memberId).build());
     }
 
+    @Transactional
     @Override
-    public void deleteDeviceToken(String deviceToken) {
-        deviceTokenRepository.deleteById(deviceToken);
+    public void deleteDeviceToken(Long memberId) {
+        deviceTokenRepository.deleteByMemberId(memberId);
     }
 }
 

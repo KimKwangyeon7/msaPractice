@@ -7,12 +7,13 @@ import com.msa.chat_service.domain.chat.entity.ChatRoom;
 import com.msa.chat_service.domain.chat.exception.ChatErrorCode;
 import com.msa.chat_service.domain.chat.exception.ChatException;
 import com.msa.chat_service.domain.chat.repository.ChatMessageRepository;
+import com.msa.chat_service.domain.chat.repository.ChatRoomMemberRepository;
 import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.member.dto.MemberInfoResponse;
-import com.msa.chat_service.domain.member.entity.Member;
-import com.msa.chat_service.domain.member.entity.enums.MemberRole;
-import com.msa.chat_service.domain.member.exception.MemberErrorCode;
-import com.msa.chat_service.domain.member.exception.MemberException;
+import com.msa.chat_service.global.component.firebase.dto.request.FcmSubscribeRequest;
+import com.msa.chat_service.global.component.firebase.dto.request.FcmTokenRequest;
+import com.msa.chat_service.global.component.firebase.dto.request.FcmTopicRequest;
+import com.msa.chat_service.global.component.firebase.service.FirebaseService;
 import com.msa.chat_service.global.component.kafka.KafkaConstants;
 import com.msa.chat_service.global.component.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,8 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final KafkaProducer kafkaProducer;
-    //private final FirebaseService firebaseService;
+    private final FirebaseService firebaseService;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Override
     public List<ChatMessageResponse> selectChatMessages(Long chatRoomId, Long lastId) {
@@ -69,6 +71,11 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 //                        .body(chatMessage.getContent())
 //                        .topicName("chat.room." + chatMessage.getChatRoom().getId())
 //                        .build());
+        List<Long> members = chatRoomMemberRepository.findAllByChatRoomId(chatMessage.getChatRoom().getId());
+        for (Long member : members) {
+            FcmTokenRequest fcmTokenRequest = new FcmTokenRequest(chatMessage.getChatRoom().getName(), chatMessage.getContent(), member);
+            firebaseService.sendMessageByToken(fcmTokenRequest);
+        }
     }
 
     private MemberInfoResponse getMemberInfo(Long memberId) {
