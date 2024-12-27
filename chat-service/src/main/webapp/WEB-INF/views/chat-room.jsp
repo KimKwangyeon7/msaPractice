@@ -22,9 +22,52 @@
     <title><% out.print(chatRoomName); %></title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-messaging-compat.js"></script>
     <script>
         let stompClient = null;
         const csrfToken = "<%= csrfToken %>";
+        const currentChatRoomId = "<%= chatRoomId %>";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Firebase 초기화 설정
+            const firebaseConfig = {
+                apiKey: "AIzaSyBD3MGw9uE9Xpw3wvYKA4Ih_wqlmolAWYo",
+                authDomain: "msapractice-cecd2.firebaseapp.com",
+                projectId: "msapractice-cecd2",
+                storageBucket: "msapractice-cecd2.firebasestorage.app",
+                messagingSenderId: "335419323377",
+                appId: "1:335419323377:web:448f785add14f0dcf88a50",
+                measurementId: "G-0MXDBWN85V",
+            };
+
+            // Firebase 앱 초기화
+            const app = firebase.initializeApp(firebaseConfig);
+            const messaging = firebase.messaging();
+
+            // 푸시 알림 수신 처리
+            messaging.onMessage((payload) => {
+                console.log("푸시 알림 수신:", payload);
+
+                const { title, body } = payload.notification;
+                const payloadChatRoomId = payload.data?.chatRoomId; // 알림 데이터에서 채팅방 ID 가져오기
+
+                // 현재 채팅방의 알림인 경우 무시
+                if (payloadChatRoomId === currentChatRoomId) {
+                    console.log("현재 채팅방의 알림이므로 무시합니다.");
+                    return;
+                }
+
+                // 알림 표시
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body: body,
+                    });
+                } else {
+                    alert(`[알림] ${title}: ${body}`);
+                }
+            });
+        });
         // WebSocket 연결
         function connect() {
             const socket = new WebSocket('ws://localhost:9003/ws');

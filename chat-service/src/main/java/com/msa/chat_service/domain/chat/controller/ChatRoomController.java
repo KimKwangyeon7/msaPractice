@@ -1,6 +1,5 @@
 package com.msa.chat_service.domain.chat.controller;
 
-import com.google.api.Http;
 import com.msa.chat_service.domain.chat.dto.JwtTokenPropsInfo;
 import com.msa.chat_service.domain.chat.dto.request.CreateChatRoomRequest;
 import com.msa.chat_service.domain.chat.dto.request.MyChatRoomListRequest;
@@ -24,7 +23,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +57,6 @@ public class ChatRoomController {
         //log.info("X-CSRF-TOKEN: {}", csrfToken);
         request.setAttribute("csrfToken", csrfToken);
         List<ChatRoomListResponse> chatRooms = chatRoomService.selectChatRooms(null);
-//        for (ChatRoomListResponse chat: chatRooms){
-//            System.out.println(chat.chatRoomId() + " " + chat.name());
-//        }
         request.setAttribute("chatRooms", chatRooms);
         HttpSession session = request.getSession(true);
         session.setAttribute("csrfToken", csrfToken);
@@ -135,7 +130,6 @@ public class ChatRoomController {
 //            description = "채팅방 상세정보를 조회하는 기능입니다."
 //    )
     @GetMapping("/{chatRoomId}")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Message<ChatRoomResponse>> selectChatRoomDetail(@PathVariable Long chatRoomId) {
         ChatRoomResponse response = chatRoomService.selectChatRoomDetail(chatRoomId);
         return ResponseEntity.ok().body(Message.success(response));
@@ -146,7 +140,6 @@ public class ChatRoomController {
 //            description = "채팅방에 필요한 정보를 입력하여 채팅방을 생성하는 기능입니다."
 //    )
     @PostMapping("/create")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> createChatRoom(@Validated @RequestBody CreateChatRoomRequest createChatRoomRequest, HttpServletRequest request, HttpSession session) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
@@ -179,7 +172,6 @@ public class ChatRoomController {
 //            description = "채팅방을 나가는 기능입니다."
 //    )
     @DeleteMapping("/{chatRoomId}")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Message<Void>> exitChatRoom(@PathVariable Long chatRoomId, HttpServletRequest request) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
@@ -195,7 +187,6 @@ public class ChatRoomController {
 //            description = "채팅방에 입장하는 기능입니다."
 //    )
     @PostMapping("/{chatRoomId}")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> enterChatRoom(@PathVariable Long chatRoomId, HttpServletRequest request) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);
@@ -211,7 +202,6 @@ public class ChatRoomController {
 //            description = "채팅 메시지 내역을 불러오는 기능입니다."
 //    )
     @GetMapping("/{chatRoomId}/messages")
-    //@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> selectChatMessages(@PathVariable Long chatRoomId, Long lastId, HttpServletRequest request) {
         String accessToken = getAccessToken(request);
         MemberLoginActive memberLoginActive = parseAccessToken(accessToken);

@@ -23,5 +23,6 @@ public interface FirebaseService {
     void sendMessageByToken(FcmTokenRequest request);
     void createDeviceToken(Long memberId, String deviceToken);
     void subscribeByTopic(FcmSubscribeRequest request);
-    void deleteDeviceToken(String deviceToken);
+    void unsubscribeByTopic(FcmSubscribeRequest request);
+    void deleteDeviceToken(Long memberId);
 }

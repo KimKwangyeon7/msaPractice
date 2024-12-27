@@ -17,6 +17,10 @@ import com.msa.chat_service.domain.chat.repository.ChatRoomRepository;
 import com.msa.chat_service.domain.member.entity.Member;
 import com.msa.chat_service.domain.member.entity.enums.Category;
 import com.msa.chat_service.domain.member.entity.enums.MemberRole;
+import com.msa.chat_service.global.component.firebase.dto.request.FcmSubscribeRequest;
+import com.msa.chat_service.global.component.firebase.entity.DeviceToken;
+import com.msa.chat_service.global.component.firebase.repository.DeviceTokenRepository;
+import com.msa.chat_service.global.component.firebase.service.FirebaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +35,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageService chatMessageService;
+    private final FirebaseService firebaseService;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Override
     public List<ChatRoomListResponse> selectChatRooms(Long lastId) {
@@ -57,6 +63,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .chatRoom(chatRoom)
                 .build());
 
+        String topicName = "chat-room-" + chatRoom.getId();
+        String token = deviceTokenRepository.findTokenAllByMember(memberId).orElse(null).get(0);
+        FcmSubscribeRequest fcmSubscribeRequest = new FcmSubscribeRequest(token, topicName);
+        firebaseService.subscribeByTopic(fcmSubscribeRequest);
+
         return chatRoom.getId();
     }
 
@@ -76,6 +87,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             if (chatRoom.isFull(memberCount)) {
                 throw new ChatException(ChatErrorCode.FULL_CHAT_ROOM);
             }
+            // 토픽 구독
+            String topicName = "chat.room." + chatRoomId;
+            String token = deviceTokenRepository.findTokenAllByMember(memberId).orElse(null).get(0);
+            FcmSubscribeRequest fcmSubscribeRequest = new FcmSubscribeRequest(token, topicName);
+            firebaseService.subscribeByTopic(fcmSubscribeRequest);
 
             chatRoomMemberRepository.save(ChatRoomMember
                     .builder()
@@ -107,6 +123,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         // 구성원 제거
         chatRoomMemberRepository.deleteByMemberIdAndChatRoom(memberId, chatRoom);
+        // 토픽 구독 취소
+        String topicName = "chat.room." + chatRoomId;
+        String token = deviceTokenRepository.findTokenAllByMember(memberId).orElse(null).get(0);
+        FcmSubscribeRequest fcmSubscribeRequest = new FcmSubscribeRequest(token, topicName);
+        firebaseService.unsubscribeByTopic(fcmSubscribeRequest);
 
         if (!chatRoomMemberRepository.existsByChatRoom(chatRoom)) {
             // 채팅 메시지 삭제
