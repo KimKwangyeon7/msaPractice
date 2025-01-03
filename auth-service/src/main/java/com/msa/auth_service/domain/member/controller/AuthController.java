@@ -87,9 +87,7 @@ public class AuthController {
             session.setAttribute("csrfToken", csrfToken);
             session.setAttribute("email", email);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Login successful"
-            ));
+            return ResponseEntity.ok(csrfToken);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "error", "Invalid username or password"
@@ -103,32 +101,37 @@ public class AuthController {
         String csrfToken = (String) session.getAttribute("csrfToken");
         String email = (String) session.getAttribute("email");
 
-        // 세션에 저장된 값이 없을 경우 처리
-        if (csrfToken == null || email == null) {
-            model.addAttribute("error", "Session expired. Please log in again.");
-            return "redirect:/auth/login";
-        }
+
 
         String accessToken = getAccessToken(request);
         if (accessToken == null) {
-            String refreshToken = refreshTokenRepository.find(email).orElse(null);
-            if (refreshToken == null) {
-                model.addAttribute("error", "Session expired. Please log in again.");
-                return "redirect:/auth/login";
+//            String refreshToken = refreshTokenRepository.find(email).orElse(null);
+//            if (refreshToken == null) {
+//                model.addAttribute("error", "Session expired. Please log in again.");
+//                return "redirect:/auth/login";
+//            }
+//            accessToken = jwtTokenProvider.issueAccessToken(findMemberByEmail(email));
+//            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+//            accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
+//            accessTokenCookie.setMaxAge(6000); // 6000초
+//
+//            // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
+//            accessTokenCookie.setHttpOnly(true);
+//            // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
+//            //accessTokenCookie.setSecure(false);
+//            // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
+//            // SameSite 설정은 Java 11 이상에서 지원됩니다.
+//            //accessTokenCookie.setAttribute("SameSite", "None");
+//            response.addCookie(accessTokenCookie);
+            return "redirect:http://localhost:8443/auth/login";
+        } else {
+            // 세션에 저장된 값이 없을 경우 처리
+            if (csrfToken == null || email == null) {
+                MemberLoginActive memberLoginActive = jwtTokenProvider.parseAccessToken(accessToken);
+                email = memberLoginActive.email();
+                csrfToken = redisTemplate.opsForValue().get("csrfToken::"+email);
+                System.out.println("csrfToken: "+csrfToken + ", email: "+email);
             }
-            accessToken = jwtTokenProvider.issueAccessToken(findMemberByEmail(email));
-            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-            accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
-            accessTokenCookie.setMaxAge(6000); // 6000초
-
-            // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
-            accessTokenCookie.setHttpOnly(true);
-            // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
-            //accessTokenCookie.setSecure(false);
-            // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
-            // SameSite 설정은 Java 11 이상에서 지원됩니다.
-            //accessTokenCookie.setAttribute("SameSite", "None");
-            response.addCookie(accessTokenCookie);
         }
 
         model.addAttribute("csrfToken", csrfToken);
@@ -138,15 +141,40 @@ public class AuthController {
     }
 
     @GetMapping("/member/password/change")
-    public String changePwdPage(HttpSession session, Model model) {
+    public String changePwdPage(HttpSession session, Model model, HttpServletRequest request) {
         // 세션에서 CSRF 토큰과 이메일 가져오기
         String csrfToken = (String) session.getAttribute("csrfToken");
         String email = (String) session.getAttribute("email");
 
-        // 세션에 저장된 값이 없을 경우 처리
-        if (csrfToken == null || email == null) {
-            model.addAttribute("error", "Session expired. Please log in again.");
-            return "redirect:/auth/login";
+        String accessToken = getAccessToken(request);
+        if (accessToken == null) {
+//            String refreshToken = refreshTokenRepository.find(email).orElse(null);
+//            if (refreshToken == null) {
+//                model.addAttribute("error", "Session expired. Please log in again.");
+//                return "redirect:/auth/login";
+//            }
+//            accessToken = jwtTokenProvider.issueAccessToken(findMemberByEmail(email));
+//            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+//            accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
+//            accessTokenCookie.setMaxAge(6000); // 6000초
+//
+//            // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
+//            accessTokenCookie.setHttpOnly(true);
+//            // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
+//            //accessTokenCookie.setSecure(false);
+//            // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
+//            // SameSite 설정은 Java 11 이상에서 지원됩니다.
+//            //accessTokenCookie.setAttribute("SameSite", "None");
+//            response.addCookie(accessTokenCookie);
+            return "redirect:http://localhost:8443/auth/login";
+        } else {
+            // 세션에 저장된 값이 없을 경우 처리
+            if (csrfToken == null || email == null) {
+                MemberLoginActive memberLoginActive = jwtTokenProvider.parseAccessToken(accessToken);
+                email = memberLoginActive.email();
+                csrfToken = redisTemplate.opsForValue().get("csrfToken::"+email);
+                System.out.println("csrfToken: "+csrfToken + ", email: "+email);
+            }
         }
 
         model.addAttribute("csrfToken", csrfToken);
@@ -156,16 +184,47 @@ public class AuthController {
     }
 
     @GetMapping("/member/update")
-    public String updateProfilePage(HttpSession session, Model model) {
+    public String updateProfilePage(HttpSession session, Model model, HttpServletRequest request) {
         // 세션에서 CSRF 토큰과 이메일 가져오기
         String csrfToken = (String) session.getAttribute("csrfToken");
         String email = (String) session.getAttribute("email");
 
-        // 세션에 저장된 값이 없을 경우 처리
-        if (csrfToken == null || email == null) {
-            model.addAttribute("error", "Session expired. Please log in again.");
-            return "redirect:/auth/login";
+        String accessToken = getAccessToken(request);
+        if (accessToken == null) {
+//            String refreshToken = refreshTokenRepository.find(email).orElse(null);
+//            if (refreshToken == null) {
+//                model.addAttribute("error", "Session expired. Please log in again.");
+//                return "redirect:/auth/login";
+//            }
+//            accessToken = jwtTokenProvider.issueAccessToken(findMemberByEmail(email));
+//            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+//            accessTokenCookie.setPath("/"); // 쿠키의 경로 설정
+//            accessTokenCookie.setMaxAge(6000); // 6000초
+//
+//            // HttpOnly 설정: JavaScript에서 쿠키에 접근하지 못하도록 제한
+//            accessTokenCookie.setHttpOnly(true);
+//            // Secure 설정: HTTPS에서만 전송되도록 제한 (HTTPS를 사용하지 않는 경우 주석 처리 가능)
+//            //accessTokenCookie.setSecure(false);
+//            // SameSite 설정: 요청의 출처를 제한하여 CSRF 공격을 방지
+//            // SameSite 설정은 Java 11 이상에서 지원됩니다.
+//            //accessTokenCookie.setAttribute("SameSite", "None");
+//            response.addCookie(accessTokenCookie);
+            return "redirect:http://localhost:8443/auth/login";
+        } else {
+            // 세션에 저장된 값이 없을 경우 처리
+            if (csrfToken == null || email == null) {
+                MemberLoginActive memberLoginActive = jwtTokenProvider.parseAccessToken(accessToken);
+                email = memberLoginActive.email();
+                csrfToken = redisTemplate.opsForValue().get("csrfToken::"+email);
+                System.out.println("csrfToken: "+csrfToken + ", email: "+email);
+            }
         }
+
+//        // 세션에 저장된 값이 없을 경우 처리
+//        if (csrfToken == null || email == null) {
+//            model.addAttribute("error", "Session expired. Please log in again.");
+//            return "redirect:/auth/login";
+//        }
         Member member = findMemberByEmail(email);
 
         model.addAttribute("profile", member.getProfileImage());

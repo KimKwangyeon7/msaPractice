@@ -48,11 +48,11 @@
                     contentType: "application/x-www-form-urlencoded",
                     data: { username, password },
                     xhrFields: { withCredentials: true }, // 쿠키 허용
-                    success: function (response, textStatus, jqXHR) {
+                    success: function (response, textStatus, xhr) {
                         alert("Login successful!");
-
+                        console.log(response);
                         // 응답 헤더에서 CSRF 토큰 가져오기
-                        const csrfToken = jqXHR.getResponseHeader("X-CSRF-TOKEN");
+                        const csrfToken = response
                         if (!csrfToken) {
                             alert("CSRF 토큰을 가져올 수 없습니다.");
                             return;
@@ -71,6 +71,71 @@
                             console.error("Failed to parse error response", e);
                         }
                         alert(`Login failed: ${errorMessage}`);
+                    }
+                });
+            });
+
+            // 회원가입 버튼 클릭 이벤트
+            $('#signupButton').on('click', function () {
+                // 회원가입 페이지로 GET 요청
+                window.location.href = "http://localhost:8443/auth/signup";
+            });
+            // 카카오 로그인 버튼 클릭 이벤트
+            $('#kakaoLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/KAKAO",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Kakao login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Kakao login failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
+
+            // 네이버 로그인 버튼 클릭 이벤트
+            $('#naverLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/NAVER",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Naver login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Naver login failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                });
+            });
+
+            // 구글 로그인 버튼 클릭 이벤트
+            $('#googleLoginButton').on('click', function () {
+                // 카카오 로그인 URL 요청
+                $.ajax({
+                    url: "http://localhost:8443/auth/oauth/GOOGLE",
+                    method: "GET",
+                    success: function (response) {
+                        // 응답으로 받은 URL로 이동
+                        if (response && response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("Failed to get Google login URL.");
+                        }
+                    },
+                    error: function (xhr) {
+                        alert(`Google login failed: ${xhr.status} ${xhr.statusText}`);
                     }
                 });
             });

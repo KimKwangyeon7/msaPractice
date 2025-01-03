@@ -8,6 +8,7 @@
     String senderId = request.getAttribute("senderId").toString();
     String senderNickname = request.getAttribute("senderNickname").toString();
     String csrfToken = request.getAttribute("csrfToken").toString();
+    //String deviceToken = request.getAttribute("csrfToken").toString();
     List<ChatMessageResponse> chatMessages = (List<ChatMessageResponse>) request.getAttribute("chatMessages");
     // 채팅 내역을 오래된 순으로 정렬
     if (chatMessages != null) {
@@ -28,7 +29,7 @@
         let stompClient = null;
         const csrfToken = "<%= csrfToken %>";
         const currentChatRoomId = "<%= chatRoomId %>";
-
+        const senderId = "<%= senderId %>";
         document.addEventListener("DOMContentLoaded", function () {
             // Firebase 초기화 설정
             const firebaseConfig = {
@@ -50,8 +51,9 @@
                 console.log("푸시 알림 수신:", payload);
 
                 const { title, body } = payload.notification;
-                const payloadChatRoomId = payload.data?.chatRoomId; // 알림 데이터에서 채팅방 ID 가져오기
-
+                const payloadChatRoomId = payload.data.chatRoomId; // 알림 데이터에서 채팅방 ID 가져오기
+                console.log(payloadChatRoomId);
+                console.log(currentChatRoomId);
                 // 현재 채팅방의 알림인 경우 무시
                 if (payloadChatRoomId === currentChatRoomId) {
                     console.log("현재 채팅방의 알림이므로 무시합니다.");

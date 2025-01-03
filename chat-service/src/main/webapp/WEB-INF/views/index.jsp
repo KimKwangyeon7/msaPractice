@@ -101,6 +101,8 @@
 </ul>
 
 <button onclick="window.location.href='/chat/create'">채팅방 생성</button>
-
+<br><br>
+<!-- 기존 링크도 유지 -->
+<button onclick="window.location.href='http://localhost:8443/auth/main'">메인페이지</button>
 </body>
 </html>

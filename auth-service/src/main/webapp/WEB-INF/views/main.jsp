@@ -1,16 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    String csrfToken = request.getAttribute("csrfToken").toString();
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Main Page</title>
-    <meta name="csrf-token" content="${csrfToken}">
     <script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-messaging-compat.js"></script>
     <script>
         $(document).ready(function () {
             // CSRF 토큰 및 이메일 값 가져오기
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfToken = "<%= csrfToken %>";
+            console.log("csrfToken: " + csrfToken);
             // Firebase 초기화 설정
             const firebaseConfig = {
                 apiKey: "AIzaSyBD3MGw9uE9Xpw3wvYKA4Ih_wqlmolAWYo",
@@ -126,9 +129,8 @@
 
             // 채팅 서비스로 이동
             $('#chat-service').click(function () {
-                const url = "/chat/index";
                 // 페이지 이동
-                window.location.href = url;
+                window.location.href = "/chat/index";
             });
         });
     </script>

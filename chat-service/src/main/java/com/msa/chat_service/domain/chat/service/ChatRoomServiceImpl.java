@@ -22,11 +22,13 @@ import com.msa.chat_service.global.component.firebase.entity.DeviceToken;
 import com.msa.chat_service.global.component.firebase.repository.DeviceTokenRepository;
 import com.msa.chat_service.global.component.firebase.service.FirebaseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -89,9 +91,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             }
             // 토픽 구독
             String topicName = "chat.room." + chatRoomId;
-            String token = deviceTokenRepository.findTokenAllByMember(memberId).orElse(null).get(0);
-            FcmSubscribeRequest fcmSubscribeRequest = new FcmSubscribeRequest(token, topicName);
-            firebaseService.subscribeByTopic(fcmSubscribeRequest);
+            List<String> tokens = deviceTokenRepository.findTokenAllByMember(memberId).orElse(null);
+            if (tokens == null || tokens.isEmpty()) {
+                // 사용자가 알림 권한을 허용하지 않아 토큰이 없는 경우 처리
+                log.warn("Member with ID {} has no FCM token. Skipping topic subscription.", memberId);
+            } else {
+                // 토큰이 있는 경우에만 토픽 구독
+                String token = tokens.get(0);
+                FcmSubscribeRequest fcmSubscribeRequest = new FcmSubscribeRequest(token, topicName);
+                firebaseService.subscribeByTopic(fcmSubscribeRequest);
+            }
 
             chatRoomMemberRepository.save(ChatRoomMember
                     .builder()

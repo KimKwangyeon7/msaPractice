@@ -6,5 +6,6 @@ import lombok.Builder;
 public record FcmTokenRequest(
         String title,
         String body,
-        Long memberId
+        Long memberId,
+        Long chatRoomId
 ) { }
