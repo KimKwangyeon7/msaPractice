@@ -73,7 +73,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 //                        .build());
         List<Long> members = chatRoomMemberRepository.findAllByChatRoomId(chatMessage.getChatRoom().getId());
         for (Long member : members) {
-            FcmTokenRequest fcmTokenRequest = new FcmTokenRequest(chatMessage.getChatRoom().getName(), chatMessage.getContent(), member);
+            FcmTokenRequest fcmTokenRequest = new FcmTokenRequest(chatMessage.getChatRoom().getName(), chatMessage.getContent(), member, chatMessage.getChatRoom().getId());
             firebaseService.sendMessageByToken(fcmTokenRequest);
         }
     }
