@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 
@@ -30,7 +31,6 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final KafkaProducer kafkaProducer;
-    private final FirebaseService firebaseService;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Override
@@ -74,9 +74,56 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         List<Long> members = chatRoomMemberRepository.findAllByChatRoomId(chatMessage.getChatRoom().getId());
         for (Long member : members) {
             FcmTokenRequest fcmTokenRequest = new FcmTokenRequest(chatMessage.getChatRoom().getName(), chatMessage.getContent(), member, chatMessage.getChatRoom().getId());
-            firebaseService.sendMessageByToken(fcmTokenRequest);
+            sendMessageByToken(fcmTokenRequest);
         }
     }
+    private void sendMessageByToken(FcmTokenRequest fcmTokenRequest) {
+        WebClient webClient = WebClient.create("http://localhost:9004");
+
+        try {
+            // REST API 호출
+            String response = webClient.post()
+                    .uri("/alarm/message/token") // FCM 구독 요청 엔드포인트
+                    .bodyValue(fcmTokenRequest) // 요청 본문에 DTO 전달
+                    .retrieve()
+                    .bodyToMono(String.class) // 반환 값을 String으로 처리
+                    .block(); // 동기화 호출
+            System.out.println("메시지 전달 성공: " + response);
+        } catch (WebClientResponseException e) {
+            // 응답에 대한 예외 처리
+            System.err.println("메시지 전달 요청 실패: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw new RuntimeException("메시지 전달 요청 중 오류 발생", e);
+        } catch (Exception e) {
+            // 기타 예외 처리
+            System.err.println("메시지 전달 요청 중 알 수 없는 오류 발생: " + e.getMessage());
+            throw new RuntimeException("메시지 전달 요청 중 알 수 없는 오류 발생", e);
+        }
+    }
+
+    private void callUnsubscribeByTopic(FcmSubscribeRequest request) {
+        // 예제: WebClient 사용
+        WebClient webClient = WebClient.create("http://localhost:9004");
+
+        try {
+            // REST API 호출
+            String response = webClient.post()
+                    .uri("/alarm/message/unsubscribe") // FCM 구독 요청 엔드포인트
+                    .bodyValue(request) // 요청 본문에 DTO 전달
+                    .retrieve()
+                    .bodyToMono(String.class) // 반환 값을 String으로 처리
+                    .block(); // 동기화 호출
+            System.out.println("구독 취소 성공: " + response);
+        } catch (WebClientResponseException e) {
+            // 응답에 대한 예외 처리
+            System.err.println("구독 취소 요청 실패: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw new RuntimeException("FCM 구독 취소 요청 중 오류 발생", e);
+        } catch (Exception e) {
+            // 기타 예외 처리
+            System.err.println("FCM 구독 취소 요청 중 알 수 없는 오류 발생: " + e.getMessage());
+            throw new RuntimeException("FCM 취소 구독 요청 중 알 수 없는 오류 발생", e);
+        }
+    }
+
 
     private MemberInfoResponse getMemberInfo(Long memberId) {
         WebClient webClient = WebClient.create("http://localhost:9443");

@@ -160,7 +160,7 @@
             // 디바이스 토큰 등록
             function registerDeviceToken(csrfToken, deviceToken) {
                 $.ajax({
-                    url: "http://localhost:8443/chat/firebase/message/" + deviceToken,
+                    url: "http://localhost:8443/alarm/message/" + deviceToken,
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
