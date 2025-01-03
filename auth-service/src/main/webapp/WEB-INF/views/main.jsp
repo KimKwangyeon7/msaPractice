@@ -55,7 +55,7 @@
             // 디바이스 토큰 삭제 함수
             function deleteDeviceToken(csrfToken) {
                 $.ajax({
-                    url: "http://localhost:8443/chat/firebase/message",
+                    url: "http://localhost:8443/alarm/message",
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
