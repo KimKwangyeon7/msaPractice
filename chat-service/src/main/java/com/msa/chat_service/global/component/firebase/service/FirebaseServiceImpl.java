@@ -121,19 +121,35 @@ public class FirebaseServiceImpl implements FirebaseService {
 //        } catch (FirebaseMessagingException e) {
 //            throw new FcmException(FcmErrorCode.CAN_NOT_SEND_NOTIFICATION);
 //        }
-        String token = deviceTokenRepository.findTokenAllByMember(fcmTokenRequest.memberId()).orElse(null).get(0);
-        Message message = Message.builder()
-                .setToken(token)
-                .setNotification(Notification.builder()
+        List<String> tokenList = deviceTokenRepository.findTokenAllByMember(fcmTokenRequest.memberId())
+                .orElseThrow(() -> new FcmException(FcmErrorCode.NO_EXIST_TOKEN));
+
+        if (tokenList == null || tokenList.isEmpty()) {
+            // 토큰이 없을 때 예외 처리
+            //throw new FcmException(FcmErrorCode.NO_EXIST_TOKEN);
+            log.warn("Member with ID {} has no FCM token. Skipping notification.", fcmTokenRequest.memberId());
+            return;
+        }
+
+        try {
+            // 유효한 첫 번째 토큰으로 메시지 전송
+            Message message = Message.builder()
+                    .setToken(tokenList.get(0)) // 첫 번째 토큰 사용
+                    .setNotification(Notification.builder()
                             .setTitle(fcmTokenRequest.title())
                             .setBody(fcmTokenRequest.body())
                             .build())
-                .build();
-        try {
+                    .putData("senderId", fcmTokenRequest.memberId().toString())
+                    .putData("chatRoomId",fcmTokenRequest.chatRoomId().toString() )
+                    .build();
+
             String response = FirebaseMessaging.getInstance().send(message);
             System.out.println("메시지 전송 성공: " + response);
+
         } catch (FirebaseMessagingException e) {
-            System.err.println("메시지 전송 실패: " + e.getMessage());
+            // 메시지 전송 실패 시 예외 처리
+            //throw new FcmException(FcmErrorCode.CAN_NOT_SEND_NOTIFICATION);
+            log.error("Failed to send notification to member ID {}: {}", fcmTokenRequest.memberId(), e.getMessage());
         }
     }
 

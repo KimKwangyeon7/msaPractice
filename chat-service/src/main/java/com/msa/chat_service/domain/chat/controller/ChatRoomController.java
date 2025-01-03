@@ -16,6 +16,7 @@ import com.msa.chat_service.domain.chat.service.ChatRoomService;
 import com.msa.chat_service.domain.member.dto.MemberLoginActive;
 import com.msa.chat_service.domain.member.entity.enums.MemberRole;
 import com.msa.chat_service.global.common.dto.Message;
+import com.msa.chat_service.global.component.firebase.repository.DeviceTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -46,6 +47,8 @@ public class ChatRoomController {
     private final JwtTokenPropsInfo jwtTokenPropsInfo;
     private final ChatRoomRepository chatRoomRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final DeviceTokenRepository deviceTokenRepository;
+
     /**
      * 채팅 서비스 메인 페이지로 이동
      */
@@ -84,6 +87,12 @@ public class ChatRoomController {
         List<ChatMessageResponse> chats = chatMessageService.selectChatMessages(chatRoomId, null);
 //        for (ChatMessageResponse chat: chats){
 //            System.out.println(chat.getContent() + " " + chat.getSenderNickname());
+//        }
+//        List<String> list = deviceTokenRepository.findTokenAllByMember(memberLoginActive.id()).orElse(null);
+//        if (list != null && list.size() > 0) {
+//            request.setAttribute("deviceToken", list.get(0));
+//        } else {
+//            request.setAttribute("deviceToken", null);
 //        }
         request.setAttribute("chatRoomName", chatRoomTitle);
         request.setAttribute("chatMessages", chats);
