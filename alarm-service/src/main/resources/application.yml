@@ -1,0 +1,73 @@
+#spring.application.name=alarm-service
+server:
+  base-url: localhost
+  port: 9004
+
+spring:
+  application:
+    name: alarm-service
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/ # Eureka ?? ??
+      instance:
+        hostname: localhost
+        prefer-ip-address: true
+
+  servlet:
+    # file ??? ?? ?? (????? ?? ?? ? Spring boot? ????? 1MB? ???)
+    multipart:
+      max-file-size: 10MB  # ?? ?? ??
+      max-request-size: 10MB  # ?? ?? ??
+
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update          # ddl ?? ?? ??
+    properties:
+      hibernate:
+        format_sql: true             # ??????? ??? SQL? ??? ? ?? ?? ??
+        use_sql_comments: true
+        show_sql: true               # ??????? ??? SQL? ??
+        jdbc:
+          batch_size: 100              #   insert/update ??? ??? ???? ??? DB? ?? ? ?? ??
+        default_batch_fetch_size: 100
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver  # DB ????
+    url: jdbc:mysql://${server.base-url}:3306/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # ?????? URL
+    username: root                    # ?????? ???
+    password: 8llow8llowme
+
+  # NoSQL setting
+  data:
+    # Redis setting
+    redis:
+      host: ${server.base-url}
+      port: 6379
+
+# firebase setting
+app:
+  firebase-configuration-file: classpath:serviceAccountKey.json
+  #  firebase-bucket: ENC(kEjE5eNrPFCEldmd4VOt0mXnXI2qkPVNJIhOBdW8K60=)
+  firebase-project-id: msapractice-cecd2
+
+# log ??
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.hibernate:
+      type.descriptor.sql: trace
+      org.hibernate.SQLQuery: debug
+
+jwt:
+  accessKey: "w7Dd0jmlEjFvWfnH8xCyAaD4J9KeShMQEfK5TZZjbgM="
+  refreshKey: "YrLk76XDh9TaBtKxN+WxMr1Zm+zKlOPUv6RJqz9TZYI="
+  accessExpiration: PT420M  # 420? (PT420M)
+  refreshExpiration: PT10080M  # 10080? (7?) (PT10080M)
+
+
