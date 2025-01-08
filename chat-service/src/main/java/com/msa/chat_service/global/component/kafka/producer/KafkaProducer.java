@@ -25,14 +25,4 @@ public class KafkaProducer {
         log.info("카프카 이벤트 생성 및 발송: 토픽 = {}, 데이터 타입 = {}", topic, data.getClass().getSimpleName());
         kafkaTemplate.send(topic, data);
     }
-
-//    public void publish(String topic, Object message) {
-//        log.info("카프카 이벤트 생성 및 발송: 토픽 = {}, 데이터 타입 = {}", topic, message.getClass().getSimpleName());
-//        Message<Object> kafkaMessage = MessageBuilder
-//                .withPayload(message)
-//                .setHeader(KafkaHeaders.TOPIC, topic)
-//                .setHeader(JsonDeserializer.class.getName(), message.getClass().getName()) // 타입 정보 추가
-//                .build();
-//        kafkaTemplate.send(kafkaMessage);
-//    }
 }
