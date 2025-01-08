@@ -66,10 +66,15 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.2'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.2'
 
-	// JSP 설정
-	implementation 'javax.servlet:jstl:1.2'
-	runtimeOnly "org.apache.tomcat.embed:tomcat-embed-jasper"
+	// JSTL 의존성 (Jakarta 기반)
+	implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:2.0.0'
+	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
+
+// JSP 엔진 (Tomcat Jasper)
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+
+// Servlet API (Jakarta 기반)
+	implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	// WebFlux
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
