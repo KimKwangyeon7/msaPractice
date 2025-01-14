@@ -1,0 +1,115 @@
+
+services:
+#  eureka-server:
+#    build:
+#      context: ./eureka
+#    ports:
+#      - "8761:8761"
+#    container_name: eureka-server
+#    networks:
+#      - msa-network
+#    restart: always
+#
+#  api-gateway:
+#    build:
+#      context: ./api-gateway
+#    ports:
+#      - "8443:8443"
+#    container_name: api-gateway
+##    depends_on:
+##      - eureka-server
+#    networks:
+#      - msa-network
+#    environment:
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+##    restart: always
+
+  auth-service:
+    build:
+      context: ./auth-service
+    ports:
+      - "9443:9443"
+    container_name: auth-service
+#    depends_on:
+#      - eureka-server
+    networks:
+      - msa-network
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=8llow8llowme
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+#    restart: always
+
+  member-service:
+    build:
+      context: ./member-service
+    ports:
+      - "9001:9001"
+    container_name: member-service
+#    depends_on:
+#      - eureka-server
+    networks:
+      - msa-network
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+#    restart: always
+
+#  community-service:
+#    build:
+#      context: ./community-service
+#    ports:
+#      - "9002:9002"
+#    container_name: community-service
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - msa-network
+#    environment:
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3307/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=8llow8llowme
+#    restart: always
+#
+#  chat-service:
+#    build:
+#      context: ./chat-service
+#    ports:
+#      - "9003:9003"
+#    container_name: chat-service
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - msa-network
+#    environment:
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3307/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=8llow8llowme
+#    restart: always
+#
+#  alarm-service:
+#    build:
+#      context: ./alarm-service
+#    ports:
+#      - "9004:9004"
+#    container_name: alarm-service
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - msa-network
+#    environment:
+#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3307/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=8llow8llowme
+#    restart: always
+
+networks:
+  msa-network:
+    external: true

@@ -11,7 +11,7 @@ spring:
   eureka:
     client:
       service-url:
-        defaultZone: http://localhost:8761/eureka/ # Eureka ?? ??
+        defaultZone: http://eureka-server:8761/eureka/ # Eureka ?? ??
       instance:
         hostname: localhost
         prefer-ip-address: true
@@ -39,7 +39,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # DB ????
-    url: jdbc:mysql://${server.base-url}:3306/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # ?????? URL
+    url: jdbc:mysql://${server.base-url}:3307/spring?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # ?????? URL
     username: root                    # ?????? ???
     password: 8llow8llowme
 
