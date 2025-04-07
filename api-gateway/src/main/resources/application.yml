@@ -42,11 +42,12 @@ spring:
               - OPTIONS
       routes:
         - id: auth-service
-          uri: http://auth-service:9443
+          #uri: http://auth-service:9443
+          uri: http://localhost:9443
           predicates:
             - Path=/auth/**
         - id: firebase-messaging
-          uri: http://auth-service:9443  # 인증 서버 URL
+          uri: http://localhost:9443  # 인증 서버 URL
           predicates:
             - Path=/firebase-messaging-sw.js
           filters:
@@ -87,7 +88,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 logging:
   level:

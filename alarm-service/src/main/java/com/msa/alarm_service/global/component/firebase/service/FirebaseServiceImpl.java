@@ -66,8 +66,25 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public void subscribeByTopic(FcmSubscribeRequest fcmSubscribeRequest) {
         try {
-            FirebaseMessaging.getInstance().subscribeToTopic(Collections.singletonList(fcmSubscribeRequest.token()), fcmSubscribeRequest.topic());
+            TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(
+                    Collections.singletonList(fcmSubscribeRequest.token()),
+                    fcmSubscribeRequest.topic()
+            );
+
+            log.info("FCM 토픽 구독 요청 결과 - 성공: {}, 실패: {}",
+                    response.getSuccessCount(),
+                    response.getFailureCount());
+
+            if (!response.getErrors().isEmpty()) {
+                for (TopicManagementResponse.Error error : response.getErrors()) {
+                    log.error("구독 실패 - 토큰: {}, 이유: {}",
+                            error.getIndex(),
+                            error.getReason());
+                }
+            }
+
         } catch (FirebaseMessagingException e) {
+            log.error("FirebaseMessagingException 발생: {}", e.getMessage());
             throw new FcmException(FcmErrorCode.SUBSCRIBE_FAIL);
         }
     }
